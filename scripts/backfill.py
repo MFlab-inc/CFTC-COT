@@ -31,7 +31,8 @@ from cot_common import (
 
 
 def fetch_zip_text(url):
-    raw = http_get(url)
+    # 統合ZIP(2006-2016)は年次ZIPよりサイズが大きいためタイムアウトを長めに設定
+    raw = http_get(url, timeout=300, retries=3, backoff=8)
     zf = zipfile.ZipFile(io.BytesIO(raw))
     names = zf.namelist()
     texts = []
