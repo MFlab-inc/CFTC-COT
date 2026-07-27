@@ -24,6 +24,8 @@ import csv
 import io
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
@@ -42,10 +44,25 @@ CSV_HEADER = ["date", "all", "long", "short", "net"]
 JST = timezone(timedelta(hours=9))
 
 
-def http_get(url, timeout=180):
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+def http_get(url, timeout=180, retries=3, backoff=5):
+    """HTTP GET with retry (指数バックオフ)。cftc.govの一時的な混雑・瞬断対策。"""
+    last_err = None
+    for attempt in range(1, retries + 1):
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except urllib.error.HTTPError as e:
+            last_err = e
+            print("  http_get attempt %d/%d failed: HTTP %s %s (%s)"
+                  % (attempt, retries, e.code, e.reason, url))
+        except Exception as e:  # noqa: BLE001  (URLError, timeout, etc.)
+            last_err = e
+            print("  http_get attempt %d/%d failed: %s: %s (%s)"
+                  % (attempt, retries, type(e).__name__, e, url))
+        if attempt < retries:
+            time.sleep(backoff * attempt)
+    raise last_err
 
 
 def _to_int(s):
