@@ -21,6 +21,7 @@
 """
 
 import csv
+import re
 import io
 import json
 import os
@@ -66,10 +67,39 @@ def http_get(url, timeout=180, retries=3, backoff=5):
 
 
 def _to_int(s):
+    """整数文字列を int 化。TFF統合ZIP(2006-2016)は "93212.000000" のような
+    小数表記で数値を格納しているため、int() 失敗時は float() 経由でフォールバックする。
+    """
     s = s.strip().replace(",", "")
     if s in ("", "."):
         return None
-    return int(s)
+    try:
+        return int(s)
+    except ValueError:
+        return int(round(float(s)))
+
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_MDY_DATE_RE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})")
+
+
+def _normalize_date(raw):
+    """日付文字列を "YYYY-MM-DD" に正規化する。未知形式は None（=ヘッダー等としてスキップ）。
+
+    対応形式:
+      - ISO "YYYY-MM-DD"（週次ファイル・2017年以降の年次ZIP・Legacy年次ZIP）
+      - "MM/DD/YYYY[ HH:MM:SS AM|PM]"（TFF統合ZIP 2006-2016。ヘッダー上は
+        "Report_Date_as_YYYY-MM-DD" と表記されているが実データはこの形式で
+        格納されている＝2026-07-27に実データで確認済みの既知の不一致）
+    """
+    raw = raw.strip().strip('"')
+    if _ISO_DATE_RE.match(raw):
+        return raw
+    m = _MDY_DATE_RE.match(raw)
+    if m:
+        mm, dd, yyyy = m.groups()
+        return "%s-%02d-%02d" % (yyyy, int(mm), int(dd))
+    return None
 
 
 def parse_legacy_lines(text, wanted_codes):
@@ -251,9 +281,9 @@ def parse_tff_lines(text, wanted_codes):
         code = fields[3].strip().strip('"')
         if code not in wanted_codes:
             continue
-        date_iso = fields[2].strip().strip('"')
-        if len(date_iso) != 10 or date_iso[4] != "-" or date_iso[7] != "-":
-            continue
+        date_iso = _normalize_date(fields[2])
+        if date_iso is None:
+            continue  # ヘッダー行、または未知の日付形式
         try:
             oi = _to_int(fields[7])
             am_l = _to_int(fields[11])
