@@ -16,6 +16,7 @@
 """
 
 import argparse
+import csv
 import io
 import sys
 import zipfile
@@ -89,6 +90,19 @@ def main():
                   % (url, type(e).__name__, e))
             continue
         print("  tff fetched %s: %d bytes" % (url, len(text)))
+        # 追加診断: ヘッダー行 + 先頭データ行 + 対象コードの生テキスト存在確認
+        lines_preview = text.split("\n", 3)
+        for i, ln in enumerate(lines_preview[:3]):
+            fcount = len(next(csv.reader(io.StringIO(ln))) if ln.strip() else [])
+            print("  DIAG line[%d] fields=%d : %s" % (i, fcount, ln[:180]))
+        for code in sorted(tff_codes):
+            hit = code in text
+            if hit:
+                print("  DIAG code %s: FOUND as raw substring in file" % code)
+        found_any = any(code in text for code in tff_codes)
+        if not found_any:
+            print("  DIAG: none of the %d target codes appear anywhere in this file as raw text"
+                  % len(tff_codes))
         recs = parse_tff_lines(text, tff_codes)
         n = 0
         for rec in recs:
