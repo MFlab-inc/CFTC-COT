@@ -1,8 +1,8 @@
 {
  "meta": {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-07-27 20:39:08 JST",
+  "generated_at": "2026-07-27 20:45:17 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -13,7 +13,21 @@
    "all": "総建玉（Open Interest, 全区分合計）",
    "long": "非商業ポジション（usdjpy は円先物ショートを USD/JPY 買い方向として記録）",
    "short": "非商業ポジション（負値）",
-   "net": "long + short"
+   "net": "long + short",
+   "tff": "TFF(金融先物のみ): am_*=アセットマネジャー(機関投資家等), lev_*=レバレッジド・ファンド(ヘッジファンド等)。符号規則はlong/shortと同一"
+  },
+  "state_thresholds": {
+   "percentile_extreme": [
+    10,
+    90
+   ],
+   "percentile_biased": [
+    25,
+    75
+   ],
+   "momentum_weeks": 4,
+   "levf_zerocross_weeks": 8,
+   "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
   },
   "notes": "backfill 2005-2026 from official annual zips",
   "report_date_latest": "2026-07-21"
@@ -414,7 +428,315 @@
      "short": -107590,
      "net": 152125
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 98.7,
+    "bias": "extreme",
+    "side": "long",
+    "momentum_4w": 6021,
+    "momentum_label": "ロング積み増し"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 423796,
+     "am_long": 151951,
+     "am_short": -72045,
+     "am_net": 79906,
+     "lev_long": 177218,
+     "lev_short": -81033,
+     "lev_net": 96185
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 396514,
+     "am_long": 128441,
+     "am_short": -74624,
+     "am_net": 53817,
+     "lev_long": 171399,
+     "lev_short": -80938,
+     "lev_net": 90461
+    },
+    "change_1w": {
+     "am_net": 26089,
+     "lev_net": 5724
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": -71551,
+      "lev_net": 20878
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": -58130,
+      "lev_net": 21650
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": -59697,
+      "lev_net": 35406
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": -69567,
+      "lev_net": 43354
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": -75185,
+      "lev_net": 41388
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": -75981,
+      "lev_net": 56443
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": -85853,
+      "lev_net": 41662
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": -70100,
+      "lev_net": 50790
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": -77834,
+      "lev_net": 52970
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": -68198,
+      "lev_net": 50532
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": -69636,
+      "lev_net": 55632
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": -67057,
+      "lev_net": 52101
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": -81609,
+      "lev_net": 46415
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": -85299,
+      "lev_net": 50125
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": -77990,
+      "lev_net": 56616
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": -77140,
+      "lev_net": 57614
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": -69744,
+      "lev_net": 63136
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": -70109,
+      "lev_net": 53594
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": -71976,
+      "lev_net": 61475
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": -76531,
+      "lev_net": 88694
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": -58745,
+      "lev_net": 82640
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": -48348,
+      "lev_net": 78156
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": -53451,
+      "lev_net": 74147
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": -46448,
+      "lev_net": 63230
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": -28223,
+      "lev_net": 98650
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": -17730,
+      "lev_net": 84737
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": -28497,
+      "lev_net": 71766
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": -32630,
+      "lev_net": 54452
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": -25516,
+      "lev_net": 53867
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": -40546,
+      "lev_net": 29321
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": -30972,
+      "lev_net": 26317
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": -17904,
+      "lev_net": 34225
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": -2831,
+      "lev_net": 49219
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 439,
+      "lev_net": 65429
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 6250,
+      "lev_net": 54852
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 3645,
+      "lev_net": 46182
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 15945,
+      "lev_net": 51110
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 10033,
+      "lev_net": 54445
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 14398,
+      "lev_net": 68497
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 26550,
+      "lev_net": 75802
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 10596,
+      "lev_net": 52897
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 19992,
+      "lev_net": 62440
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 41886,
+      "lev_net": 64945
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 58747,
+      "lev_net": 70508
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 66012,
+      "lev_net": 88063
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": 78076,
+      "lev_net": 99844
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 81651,
+      "lev_net": 96772
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 78364,
+      "lev_net": 97092
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 68693,
+      "lev_net": 115400
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 48653,
+      "lev_net": 90083
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 53817,
+      "lev_net": 90461
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 79906,
+      "lev_net": 96185
+     }
+    ],
+    "state": {
+     "alignment": "aligned",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 97.0,
+     "lev_bias": "extreme"
+    }
+   }
   },
   "gbpusd": {
    "label": "GBP/USD",
@@ -811,7 +1133,315 @@
      "short": -119843,
      "net": -55561
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 13.2,
+    "bias": "biased",
+    "side": "short",
+    "momentum_4w": 50158,
+    "momentum_label": "ショート縮小"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 262281,
+     "am_long": 18950,
+     "am_short": -138039,
+     "am_net": -119089,
+     "lev_long": 68394,
+     "lev_short": -35158,
+     "lev_net": 33236
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 265153,
+     "am_long": 14195,
+     "am_short": -145599,
+     "am_net": -131404,
+     "lev_long": 62437,
+     "lev_short": -33896,
+     "lev_net": 28541
+    },
+    "change_1w": {
+     "am_net": 12315,
+     "lev_net": 4695
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": -65596,
+      "lev_net": 47701
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": -83325,
+      "lev_net": 39972
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": -71970,
+      "lev_net": 27369
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": -67141,
+      "lev_net": 22454
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": -74738,
+      "lev_net": 23654
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": -81390,
+      "lev_net": 21679
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": -70307,
+      "lev_net": 16955
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": -42998,
+      "lev_net": 21613
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": -44909,
+      "lev_net": 27662
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": -56967,
+      "lev_net": 32111
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": -46066,
+      "lev_net": 34862
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": -59437,
+      "lev_net": 39094
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": -68457,
+      "lev_net": 39657
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": -81113,
+      "lev_net": 40393
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": -115674,
+      "lev_net": 25923
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": -118350,
+      "lev_net": 12554
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": -116293,
+      "lev_net": 8725
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": -121437,
+      "lev_net": -1329
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": -114553,
+      "lev_net": 4865
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": -105618,
+      "lev_net": 6468
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": -82641,
+      "lev_net": 14548
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": -79794,
+      "lev_net": 18835
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": -76981,
+      "lev_net": 25691
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": -78442,
+      "lev_net": 28947
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": -79934,
+      "lev_net": 38090
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": -86493,
+      "lev_net": 40778
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": -75587,
+      "lev_net": 37143
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": -66688,
+      "lev_net": 35411
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": -78601,
+      "lev_net": 43479
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": -93543,
+      "lev_net": 42366
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": -110158,
+      "lev_net": 40151
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": -125547,
+      "lev_net": 34506
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": -120503,
+      "lev_net": 20102
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": -95958,
+      "lev_net": 11768
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": -94463,
+      "lev_net": 15716
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": -101532,
+      "lev_net": 29932
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": -99460,
+      "lev_net": 26533
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": -87915,
+      "lev_net": 22331
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": -83186,
+      "lev_net": 29137
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": -93753,
+      "lev_net": 28882
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": -102630,
+      "lev_net": 26049
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": -93150,
+      "lev_net": 37302
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": -112313,
+      "lev_net": 31369
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": -109325,
+      "lev_net": 28829
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": -101566,
+      "lev_net": 27353
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": -109656,
+      "lev_net": 22312
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": -113468,
+      "lev_net": 16836
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": -149424,
+      "lev_net": 7567
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": -156307,
+      "lev_net": 16273
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": -143257,
+      "lev_net": 17979
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": -131404,
+      "lev_net": 28541
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": -119089,
+      "lev_net": 33236
+     }
+    ],
+    "state": {
+     "alignment": "mixed",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 80.6,
+     "lev_bias": "biased"
+    }
+   }
   },
   "eurusd": {
    "label": "EUR/USD",
@@ -1208,7 +1838,315 @@
      "short": -261803,
      "net": -41338
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 27.9,
+    "bias": "neutral",
+    "side": "short",
+    "momentum_4w": -71496,
+    "momentum_label": "ショート積み増し"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 800061,
+     "am_long": 458394,
+     "am_short": -229467,
+     "am_net": 228927,
+     "lev_long": 91110,
+     "lev_short": -147781,
+     "lev_net": -56671
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 799495,
+     "am_long": 466709,
+     "am_short": -219393,
+     "am_net": 247316,
+     "lev_long": 89976,
+     "lev_short": -143667,
+     "lev_net": -53691
+    },
+    "change_1w": {
+     "am_net": -18389,
+     "lev_net": -2980
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": 357385,
+      "lev_net": 30862
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": 347425,
+      "lev_net": 34208
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": 367438,
+      "lev_net": 34938
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": 371230,
+      "lev_net": 33226
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": 376814,
+      "lev_net": 34207
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": 379800,
+      "lev_net": 29673
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": 383251,
+      "lev_net": 32612
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": 389699,
+      "lev_net": 26237
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": 394618,
+      "lev_net": 19803
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": 385477,
+      "lev_net": 22277
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": 386864,
+      "lev_net": 21385
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": 371121,
+      "lev_net": 22278
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": 371513,
+      "lev_net": 22464
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": 364571,
+      "lev_net": 17343
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": 351020,
+      "lev_net": 5182
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": 357364,
+      "lev_net": -5661
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": 356951,
+      "lev_net": 12421
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": 349762,
+      "lev_net": 14724
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": 361753,
+      "lev_net": 19272
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": 373676,
+      "lev_net": 41605
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": 374794,
+      "lev_net": 51301
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": 390397,
+      "lev_net": 56107
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": 391444,
+      "lev_net": 52662
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": 398687,
+      "lev_net": 50600
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": 404116,
+      "lev_net": 25392
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": 391204,
+      "lev_net": 10236
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": 403530,
+      "lev_net": 26361
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": 404439,
+      "lev_net": 42055
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": 410538,
+      "lev_net": 50204
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 413713,
+      "lev_net": 43549
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 395301,
+      "lev_net": 36797
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": 370272,
+      "lev_net": 29632
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 366299,
+      "lev_net": 5231
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 294538,
+      "lev_net": -6952
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 287940,
+      "lev_net": -13538
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 264417,
+      "lev_net": 3947
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 258050,
+      "lev_net": 882
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 270442,
+      "lev_net": 25382
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 286391,
+      "lev_net": 20317
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 290898,
+      "lev_net": 11594
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 285613,
+      "lev_net": 11846
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 290280,
+      "lev_net": 18003
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 270767,
+      "lev_net": 16317
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 269890,
+      "lev_net": 7296
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 285921,
+      "lev_net": 12027
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": 281556,
+      "lev_net": -17388
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 270344,
+      "lev_net": -8926
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 254730,
+      "lev_net": -15410
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 255158,
+      "lev_net": -32644
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 253918,
+      "lev_net": -45461
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 247316,
+      "lev_net": -53691
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 228927,
+      "lev_net": -56671
+     }
+    ],
+    "state": {
+     "alignment": "divergence_warning",
+     "levf_zerocross_weeks_ago": 6,
+     "lev_percentile_all": 22.2,
+     "lev_bias": "biased"
+    }
+   }
   },
   "audusd": {
    "label": "AUD/USD",
@@ -1605,7 +2543,315 @@
      "short": -103869,
      "net": -37685
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 29.5,
+    "bias": "neutral",
+    "side": "short",
+    "momentum_4w": -24673,
+    "momentum_label": "ショート積み増し"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 225153,
+     "am_long": 61574,
+     "am_short": -96718,
+     "am_net": -35144,
+     "lev_long": 53631,
+     "lev_short": -28843,
+     "lev_net": 24788
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 208457,
+     "am_long": 54353,
+     "am_short": -94922,
+     "am_net": -40569,
+     "lev_long": 55916,
+     "lev_short": -28694,
+     "lev_net": 27222
+    },
+    "change_1w": {
+     "am_net": 5425,
+     "lev_net": -2434
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": -49481,
+      "lev_net": -11386
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": -61482,
+      "lev_net": -10464
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": -67593,
+      "lev_net": -9698
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": -73775,
+      "lev_net": -4819
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": -79151,
+      "lev_net": -4483
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": -66140,
+      "lev_net": -10353
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": -68461,
+      "lev_net": -4754
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": -40442,
+      "lev_net": -3081
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": -48799,
+      "lev_net": -5546
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": -51595,
+      "lev_net": -11646
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": -53176,
+      "lev_net": -3037
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": -60136,
+      "lev_net": 5423
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": -65252,
+      "lev_net": 346
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": -60254,
+      "lev_net": -12434
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": -60691,
+      "lev_net": -7488
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": -62515,
+      "lev_net": -15531
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": -60110,
+      "lev_net": -12427
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": -69054,
+      "lev_net": -17558
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": -68078,
+      "lev_net": -17669
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": -61986,
+      "lev_net": 18563
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": -40863,
+      "lev_net": 39477
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": -40339,
+      "lev_net": 41482
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": -32752,
+      "lev_net": 33671
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": -31316,
+      "lev_net": 35115
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": -33486,
+      "lev_net": 30217
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": -31599,
+      "lev_net": 27558
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": -19349,
+      "lev_net": 44726
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": -18802,
+      "lev_net": 59409
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": -13915,
+      "lev_net": 64904
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 1761,
+      "lev_net": 70260
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 10577,
+      "lev_net": 64653
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": 28878,
+      "lev_net": 54635
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 23329,
+      "lev_net": 46568
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 41929,
+      "lev_net": 45359
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 43926,
+      "lev_net": 49145
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 44633,
+      "lev_net": 52569
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 40747,
+      "lev_net": 45901
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 36483,
+      "lev_net": 43642
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 36508,
+      "lev_net": 48325
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 45097,
+      "lev_net": 47855
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 44874,
+      "lev_net": 56600
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 47551,
+      "lev_net": 55851
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 40595,
+      "lev_net": 61178
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 19075,
+      "lev_net": 60234
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 856,
+      "lev_net": 58800
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": -12083,
+      "lev_net": 42292
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": -31451,
+      "lev_net": 41538
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": -37007,
+      "lev_net": 39111
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": -39207,
+      "lev_net": 31777
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": -37303,
+      "lev_net": 29683
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": -40569,
+      "lev_net": 27222
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": -35144,
+      "lev_net": 24788
+     }
+    ],
+    "state": {
+     "alignment": "mixed",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 81.2,
+     "lev_bias": "biased"
+    }
+   }
   },
   "sp500": {
    "label": "S&P500",
@@ -2002,7 +3248,315 @@
      "short": -272247,
      "net": -20998
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 33.5,
+    "bias": "neutral",
+    "side": "short",
+    "momentum_4w": 11158,
+    "momentum_label": "ショート縮小"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 1958349,
+     "am_long": 1145470,
+     "am_short": -214564,
+     "am_net": 930906,
+     "lev_long": 141767,
+     "lev_short": -471081,
+     "lev_net": -329314
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 1959749,
+     "am_long": 1146844,
+     "am_short": -203822,
+     "am_net": 943022,
+     "lev_long": 132631,
+     "lev_short": -503220,
+     "lev_net": -370589
+    },
+    "change_1w": {
+     "am_net": -12116,
+     "lev_net": 41275
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": 874198,
+      "lev_net": -364178
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": 850021,
+      "lev_net": -331459
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": 888124,
+      "lev_net": -392074
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": 871909,
+      "lev_net": -370976
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": 872811,
+      "lev_net": -425588
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": 862129,
+      "lev_net": -385540
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": 889056,
+      "lev_net": -420510
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": 898393,
+      "lev_net": -477811
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": 915843,
+      "lev_net": -452272
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": 937961,
+      "lev_net": -438064
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": 951171,
+      "lev_net": -462277
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": 924005,
+      "lev_net": -421227
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": 904669,
+      "lev_net": -443239
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": 908760,
+      "lev_net": -451209
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": 902352,
+      "lev_net": -408048
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": 905537,
+      "lev_net": -421002
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": 913951,
+      "lev_net": -357052
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": 907760,
+      "lev_net": -378339
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": 943150,
+      "lev_net": -440687
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": 962991,
+      "lev_net": -448762
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": 972049,
+      "lev_net": -388647
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": 939534,
+      "lev_net": -371167
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": 944337,
+      "lev_net": -366629
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": 963845,
+      "lev_net": -415354
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": 933431,
+      "lev_net": -446511
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": 894645,
+      "lev_net": -417782
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": 914197,
+      "lev_net": -427403
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": 935743,
+      "lev_net": -449521
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": 927334,
+      "lev_net": -424734
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 979368,
+      "lev_net": -466365
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 1015217,
+      "lev_net": -477391
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": 1007926,
+      "lev_net": -411358
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 901066,
+      "lev_net": -358096
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 889442,
+      "lev_net": -347577
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 881068,
+      "lev_net": -341661
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 918367,
+      "lev_net": -230392
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 943856,
+      "lev_net": -240873
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 1007138,
+      "lev_net": -414525
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 1019328,
+      "lev_net": -405927
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 998208,
+      "lev_net": -400613
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 1013401,
+      "lev_net": -398805
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 1058050,
+      "lev_net": -429355
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 1008168,
+      "lev_net": -402312
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 1006502,
+      "lev_net": -459415
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 984921,
+      "lev_net": -503509
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": 986838,
+      "lev_net": -459690
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 986577,
+      "lev_net": -523882
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 994992,
+      "lev_net": -374569
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 979498,
+      "lev_net": -362599
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 972699,
+      "lev_net": -364959
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 943022,
+      "lev_net": -370589
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 930906,
+      "lev_net": -329314
+     }
+    ],
+    "state": {
+     "alignment": "mixed",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 19.4,
+     "lev_bias": "biased"
+    }
+   }
   },
   "nikkei225": {
    "label": "NIKKEI225",
@@ -2399,7 +3953,315 @@
      "short": -2751,
      "net": 3962
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 28.0,
+    "bias": "neutral",
+    "side": "long",
+    "momentum_4w": -1829,
+    "momentum_label": "ロング縮小"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 30441,
+     "am_long": 7466,
+     "am_short": -472,
+     "am_net": 6994,
+     "lev_long": 5707,
+     "lev_short": -3172,
+     "lev_net": 2535
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 28740,
+     "am_long": 7419,
+     "am_short": -452,
+     "am_net": 6967,
+     "lev_long": 6108,
+     "lev_short": -3120,
+     "lev_net": 2988
+    },
+    "change_1w": {
+     "am_net": 27,
+     "lev_net": -453
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": 4758,
+      "lev_net": 1941
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": 5229,
+      "lev_net": -176
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": 5033,
+      "lev_net": 1296
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": 5068,
+      "lev_net": 4310
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": 4299,
+      "lev_net": 4629
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": 3818,
+      "lev_net": 4050
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": 4178,
+      "lev_net": 5460
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": 4525,
+      "lev_net": 7987
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": 3436,
+      "lev_net": 8346
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": 4509,
+      "lev_net": 7566
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": 5319,
+      "lev_net": 6925
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": 4618,
+      "lev_net": 7588
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": 5614,
+      "lev_net": 8686
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": 6364,
+      "lev_net": 8884
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": 4970,
+      "lev_net": 5982
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": 5354,
+      "lev_net": 5420
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": 5707,
+      "lev_net": 4385
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": 5672,
+      "lev_net": 5063
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": 4927,
+      "lev_net": 5948
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": 3616,
+      "lev_net": 6078
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": 2624,
+      "lev_net": 2015
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": 2608,
+      "lev_net": -88
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": 2400,
+      "lev_net": -875
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": 2276,
+      "lev_net": -786
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": 2627,
+      "lev_net": -1526
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": 3621,
+      "lev_net": 39
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": 2198,
+      "lev_net": -2005
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": 1298,
+      "lev_net": 308
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": 3224,
+      "lev_net": 1358
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 3984,
+      "lev_net": 4479
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 4962,
+      "lev_net": 5034
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": 4948,
+      "lev_net": 4625
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 4333,
+      "lev_net": 738
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 5147,
+      "lev_net": 8575
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 5105,
+      "lev_net": 2449
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 4917,
+      "lev_net": 6208
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 5208,
+      "lev_net": 7929
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 5776,
+      "lev_net": 8203
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 6247,
+      "lev_net": 6082
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 7551,
+      "lev_net": 3121
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 7624,
+      "lev_net": 2218
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 7693,
+      "lev_net": 2436
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 6441,
+      "lev_net": 1375
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 6202,
+      "lev_net": 937
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 6883,
+      "lev_net": 1636
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": 7632,
+      "lev_net": -2009
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 8919,
+      "lev_net": -4193
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 8557,
+      "lev_net": -3487
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 8154,
+      "lev_net": 1174
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 8209,
+      "lev_net": 1712
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 6967,
+      "lev_net": 2988
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 6994,
+      "lev_net": 2535
+     }
+    ],
+    "state": {
+     "alignment": "aligned",
+     "levf_zerocross_weeks_ago": 3,
+     "lev_percentile_all": 40.9,
+     "lev_bias": "neutral"
+    }
+   }
   },
   "nydow": {
    "label": "NYダウ",
@@ -2796,7 +4658,315 @@
      "short": -10617,
      "net": 13927
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 74.6,
+    "bias": "neutral",
+    "side": "long",
+    "momentum_4w": 4453,
+    "momentum_label": "ロング積み増し"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 82002,
+     "am_long": 13952,
+     "am_short": -8961,
+     "am_net": 4991,
+     "lev_long": 12695,
+     "lev_short": -16146,
+     "lev_net": -3451
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 76483,
+     "am_long": 14343,
+     "am_short": -8730,
+     "am_net": 5613,
+     "lev_long": 10010,
+     "lev_short": -12788,
+     "lev_net": -2778
+    },
+    "change_1w": {
+     "am_net": -622,
+     "lev_net": -673
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": 4501,
+      "lev_net": -2649
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": 7225,
+      "lev_net": -6303
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": 7427,
+      "lev_net": -7618
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": 4940,
+      "lev_net": -8534
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": 5252,
+      "lev_net": -7987
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": 2763,
+      "lev_net": -10158
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": 8307,
+      "lev_net": -14990
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": 4593,
+      "lev_net": -15755
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": 6166,
+      "lev_net": -6334
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": 5402,
+      "lev_net": -22049
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": 9447,
+      "lev_net": -22995
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": 9933,
+      "lev_net": -24380
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": 11171,
+      "lev_net": -20777
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": 17820,
+      "lev_net": -22337
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": 16170,
+      "lev_net": -20199
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": 14293,
+      "lev_net": -24900
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": 10087,
+      "lev_net": -21580
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": 13377,
+      "lev_net": -26697
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": 12990,
+      "lev_net": -23412
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": 13113,
+      "lev_net": -20279
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": 11922,
+      "lev_net": -18481
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": 9003,
+      "lev_net": -9502
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": 8149,
+      "lev_net": -10453
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": 11787,
+      "lev_net": -9294
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": 4909,
+      "lev_net": -7891
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": 361,
+      "lev_net": -9183
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": 4488,
+      "lev_net": -14289
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": 2316,
+      "lev_net": -11899
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": 10447,
+      "lev_net": -11628
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 5071,
+      "lev_net": -7752
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 4404,
+      "lev_net": -6440
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": -2085,
+      "lev_net": -1871
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 353,
+      "lev_net": -310
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 3939,
+      "lev_net": -366
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 1514,
+      "lev_net": -3059
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 4156,
+      "lev_net": -6818
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 583,
+      "lev_net": -7406
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 6153,
+      "lev_net": -11842
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 5722,
+      "lev_net": -8835
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 2718,
+      "lev_net": -11668
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 2638,
+      "lev_net": -14597
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": -1956,
+      "lev_net": -14001
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": -7189,
+      "lev_net": -14578
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 712,
+      "lev_net": -16197
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 895,
+      "lev_net": -13898
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": -689,
+      "lev_net": -9172
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 7801,
+      "lev_net": -9898
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 6516,
+      "lev_net": -9025
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 10235,
+      "lev_net": -9978
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 5782,
+      "lev_net": -1806
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 5613,
+      "lev_net": -2778
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 4991,
+      "lev_net": -3451
+     }
+    ],
+    "state": {
+     "alignment": "mixed",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 16.6,
+     "lev_bias": "biased"
+    }
+   }
   },
   "wti": {
    "label": "WTI原油",
@@ -3193,7 +5363,15 @@
      "short": -228493,
      "net": 81689
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 24.8,
+    "bias": "biased",
+    "side": "long",
+    "momentum_4w": -32944,
+    "momentum_label": "ロング縮小"
+   },
+   "tff": null
   },
   "gold": {
    "label": "GOLD",
@@ -3590,7 +5768,15 @@
      "short": -40875,
      "net": 183910
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 61.6,
+    "bias": "neutral",
+    "side": "long",
+    "momentum_4w": 2571,
+    "momentum_label": "ロング積み増し"
+   },
+   "tff": null
   },
   "copper": {
    "label": "銅",
@@ -3987,7 +6173,15 @@
      "short": -34057,
      "net": 73977
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 99.3,
+    "bias": "extreme",
+    "side": "long",
+    "momentum_4w": 2357,
+    "momentum_label": "ロング積み増し"
+   },
+   "tff": null
   },
   "us10y": {
    "label": "米10年債",
@@ -4384,7 +6578,315 @@
      "short": -1388024,
      "net": -879706
     }
-   ]
+   ],
+   "state": {
+    "percentile_all": 2.6,
+    "bias": "extreme",
+    "side": "short",
+    "momentum_4w": -44440,
+    "momentum_label": "ショート積み増し"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-01-03",
+     "last_date": "2026-07-21",
+     "weeks": 499
+    },
+    "latest": {
+     "date": "2026-07-21",
+     "all": 5272703,
+     "am_long": 3270327,
+     "am_short": -733141,
+     "am_net": 2537186,
+     "lev_long": 382342,
+     "lev_short": -2447147,
+     "lev_net": -2064805
+    },
+    "prev": {
+     "date": "2026-07-14",
+     "all": 5284601,
+     "am_long": 3278991,
+     "am_short": -766560,
+     "am_net": 2512431,
+     "lev_long": 387963,
+     "lev_short": -2467616,
+     "lev_net": -2079653
+    },
+    "change_1w": {
+     "am_net": 24755,
+     "lev_net": 14848
+    },
+    "weeks_52": [
+     {
+      "date": "2025-07-29",
+      "am_net": 2171711,
+      "lev_net": -2198442
+     },
+     {
+      "date": "2025-08-05",
+      "am_net": 2211387,
+      "lev_net": -2246539
+     },
+     {
+      "date": "2025-08-12",
+      "am_net": 2310930,
+      "lev_net": -2330152
+     },
+     {
+      "date": "2025-08-19",
+      "am_net": 2429667,
+      "lev_net": -2416960
+     },
+     {
+      "date": "2025-08-26",
+      "am_net": 2468376,
+      "lev_net": -2534616
+     },
+     {
+      "date": "2025-09-02",
+      "am_net": 2462553,
+      "lev_net": -2527940
+     },
+     {
+      "date": "2025-09-09",
+      "am_net": 2252089,
+      "lev_net": -2419070
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": 2236375,
+      "lev_net": -2403273
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": 2176808,
+      "lev_net": -2341844
+     },
+     {
+      "date": "2025-09-30",
+      "am_net": 2075101,
+      "lev_net": -2279994
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": 2045065,
+      "lev_net": -2316763
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": 2079072,
+      "lev_net": -2340535
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": 2163891,
+      "lev_net": -2384452
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": 2166212,
+      "lev_net": -2359385
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": 2123471,
+      "lev_net": -2296028
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": 2143361,
+      "lev_net": -2286700
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": 2244936,
+      "lev_net": -2361611
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": 2252253,
+      "lev_net": -2359316
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": 2119086,
+      "lev_net": -2254098
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": 2070630,
+      "lev_net": -2281123
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": 2020085,
+      "lev_net": -2266021
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": 2086532,
+      "lev_net": -2298327
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": 2199205,
+      "lev_net": -2358137
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": 2219683,
+      "lev_net": -2335739
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": 2180695,
+      "lev_net": -2270861
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": 1887694,
+      "lev_net": -2092224
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": 1993454,
+      "lev_net": -2154162
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": 2029644,
+      "lev_net": -2089125
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": 2146159,
+      "lev_net": -2030917
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": 2260813,
+      "lev_net": -2060250
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": 2160726,
+      "lev_net": -1987780
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": 2098536,
+      "lev_net": -1922569
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": 2044727,
+      "lev_net": -1878928
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": 2087270,
+      "lev_net": -1934928
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": 2040423,
+      "lev_net": -1848765
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": 2165718,
+      "lev_net": -1955731
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": 2217237,
+      "lev_net": -1975685
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": 2213257,
+      "lev_net": -2009971
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": 2200370,
+      "lev_net": -2040275
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": 2257647,
+      "lev_net": -2095799
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": 2137785,
+      "lev_net": -2003848
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": 2120141,
+      "lev_net": -1956942
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": 2267251,
+      "lev_net": -1952737
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": 2070343,
+      "lev_net": -2005980
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": 2354292,
+      "lev_net": -1963094
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": 2412885,
+      "lev_net": -1979511
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": 2485001,
+      "lev_net": -2082236
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": 2394087,
+      "lev_net": -1938747
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": 2378150,
+      "lev_net": -1969851
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": 2425982,
+      "lev_net": -2004023
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": 2512431,
+      "lev_net": -2079653
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": 2537186,
+      "lev_net": -2064805
+     }
+    ],
+    "state": {
+     "alignment": "mixed",
+     "levf_zerocross_weeks_ago": null,
+     "lev_percentile_all": 7.0,
+     "lev_bias": "extreme"
+    }
+   }
   }
  }
 }
