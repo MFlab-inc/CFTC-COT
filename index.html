@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFTC COT Feed | MFLab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --panel:#FFFFFF; --ink:#1B2733; --sub:#5B6B7A;
+  --line:#D7DEE5; --accent:#3A5BC7; --pos:#1E7F5C; --neg:#C43D3D;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans JP',sans-serif;
+  font-size:14px;line-height:1.6;padding:24px 16px 64px}
+.wrap{max-width:980px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;
+  border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px}
+h1{font-size:20px;font-weight:700;letter-spacing:.02em}
+h1 small{font-weight:400;color:var(--sub);font-size:13px;margin-left:8px}
+.meta{font-family:var(--mono);font-size:12px;color:var(--sub)}
+.note{font-size:12px;color:var(--sub);margin:8px 0 20px}
+table{width:100%;border-collapse:collapse;background:var(--panel)}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;
+  font-family:var(--mono);font-size:13px;white-space:nowrap}
+th{font-family:'IBM Plex Sans JP',sans-serif;font-size:12px;font-weight:500;
+  color:var(--sub);text-align:right;border-bottom:1px solid var(--ink)}
+th:first-child,td:first-child{text-align:left}
+td.sym{font-family:'IBM Plex Sans JP',sans-serif;font-weight:700;font-size:13px}
+td.sym a{color:var(--ink);text-decoration:none}
+td.sym a:hover,td.sym a:focus-visible{color:var(--accent);text-decoration:underline}
+td.sym .code{display:block;font-weight:400;font-size:11px;color:var(--sub);
+  font-family:var(--mono)}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+/* signature: ゼロ軸から左右に伸びるネットポジションバー（52週最大比） */
+.bar{width:150px;padding:0 6px}
+.bar .axis{position:relative;height:14px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
+.bar i{position:absolute;top:2px;bottom:2px;display:block}
+.bar i.p{left:50%;background:var(--pos);border-radius:0 2px 2px 0}
+.bar i.n{right:50%;background:var(--neg);border-radius:2px 0 0 2px}
+.spark{width:120px;padding:0 6px}
+.spark svg{display:block}
+.spark path{fill:none;stroke:var(--accent);stroke-width:1.4}
+.spark line{stroke:var(--line);stroke-width:1}
+#status{padding:32px;text-align:center;color:var(--sub)}
+footer{margin-top:28px;font-size:12px;color:var(--sub)}
+footer a{color:var(--accent)}
+@media(max-width:720px){
+  .spark{display:none}
+  .bar{width:96px}
+  th,td{padding:8px 6px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>CFTC COT Feed<small>非商業（投機筋）建玉・先物限定</small></h1>
+    <span class="meta" id="asof">読み込み中…</span>
+  </header>
+  <p class="note">
+    出典：CFTC Legacy Futures-Only（スプレッド除く）。USD/JPYは円先物をUSD/JPY方向に符号変換済み
+    （net プラス＝投機筋の円ショート優勢）。数値の確定ソースはCFTC公式のみ。
+  </p>
+  <div id="status">cot-feed.json を読み込んでいます…</div>
+  <table id="tbl" hidden>
+    <thead>
+      <tr>
+        <th>銘柄</th><th>締め日</th><th>総建玉</th><th>long</th><th>short</th>
+        <th>net</th><th>前週比</th><th>net（52週最大比）</th><th>52週推移</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <footer>
+    データ：<a href="data/cot-feed.json">cot-feed.json</a> ／ 銘柄別CSVは表の銘柄名リンクから。
+    週次更新：毎週土曜 9:30 JST（COT公表後・祝日順延時は翌火曜に回収）。
+    一次ソース：<a href="https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm">CFTC Commitments of Traders</a>
+  </footer>
+</div>
+<script>
+const fmt = n => n === null || n === undefined ? "—" : n.toLocaleString("en-US");
+const signed = n => (n > 0 ? "+" : "") + fmt(n);
+const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "";
+
+function sparkline(rows){
+  if(!rows || rows.length < 2) return "";
+  const w = 110, h = 26, pad = 2;
+  const nets = rows.map(r => r.net);
+  const min = Math.min(...nets, 0), max = Math.max(...nets, 0);
+  const x = i => pad + i * (w - pad * 2) / (nets.length - 1);
+  const y = v => max === min ? h / 2 : pad + (max - v) * (h - pad * 2) / (max - min);
+  const d = nets.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+  const zero = y(0).toFixed(1);
+  return `<svg width="${w}" height="${h}" role="img" aria-label="net 52週推移">` +
+         `<line x1="0" y1="${zero}" x2="${w}" y2="${zero}"></line>` +
+         `<path d="${d}"></path></svg>`;
+}
+
+function netBar(net, rows){
+  const maxAbs = Math.max(1, ...(rows || []).map(r => Math.abs(r.net)));
+  const pct = Math.min(50, Math.abs(net) / maxAbs * 50);
+  const side = net >= 0 ? "p" : "n";
+  return `<div class="axis"><i class="${side}" style="width:${pct.toFixed(1)}%"></i></div>`;
+}
+
+fetch("data/cot-feed.json", {cache: "no-store"})
+  .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(feed => {
+    document.getElementById("asof").textContent =
+      "対象週(火曜締め): " + (feed.meta.report_date_latest || "—") +
+      " ／ 生成: " + feed.meta.generated_at;
+    const order = ["usdjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
+                   "nydow","wti","gold","copper","us10y"];
+    const tb = document.getElementById("rows");
+    for(const slug of order){
+      const s = feed.symbols[slug];
+      if(!s) continue;
+      const L = s.latest, C = s.change_1w;
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="sym"><a href="data/csv/${slug}.csv">${s.label}</a>` +
+        `<span class="code">${s.cftc_code}</span></td>` +
+        (L ? `<td>${L.date}</td><td>${fmt(L.all)}</td><td>${fmt(L.long)}</td>` +
+             `<td class="neg">${fmt(L.short)}</td>` +
+             `<td class="${cls(L.net)}">${signed(L.net)}</td>` +
+             `<td class="${C ? cls(C.net) : ""}">${C ? signed(C.net) : "—"}</td>` +
+             `<td class="bar">${netBar(L.net, s.weeks_52)}</td>` +
+             `<td class="spark">${sparkline(s.weeks_52)}</td>`
+           : `<td colspan="8">データ未生成（バックフィル未実行）</td>`);
+      tb.appendChild(tr);
+    }
+    document.getElementById("status").hidden = true;
+    document.getElementById("tbl").hidden = false;
+  })
+  .catch(e => {
+    document.getElementById("status").textContent =
+      "データを読み込めませんでした（" + e.message + "）。" +
+      "バックフィル未実行の場合は Actions から backfill-history を実行してください。";
+  });
+</script>
+</body>
+</html>
