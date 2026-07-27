@@ -16,8 +16,6 @@
 """
 
 import argparse
-import csv
-import io
 import sys
 import zipfile
 from datetime import date
@@ -89,20 +87,6 @@ def main():
             print("WARN tff: fetch failed %s (%s: %s) - skip"
                   % (url, type(e).__name__, e))
             continue
-        print("  tff fetched %s: %d bytes" % (url, len(text)))
-        # 追加診断: ヘッダー行 + 先頭データ行 + 対象コードの生テキスト存在確認
-        lines_preview = text.split("\n", 3)
-        for i, ln in enumerate(lines_preview[:3]):
-            fcount = len(next(csv.reader(io.StringIO(ln))) if ln.strip() else [])
-            print("  DIAG line[%d] fields=%d : %s" % (i, fcount, ln[:180]))
-        for code in sorted(tff_codes):
-            hit = code in text
-            if hit:
-                print("  DIAG code %s: FOUND as raw substring in file" % code)
-        found_any = any(code in text for code in tff_codes)
-        if not found_any:
-            print("  DIAG: none of the %d target codes appear anywhere in this file as raw text"
-                  % len(tff_codes))
         recs = parse_tff_lines(text, tff_codes)
         n = 0
         for rec in recs:
@@ -110,12 +94,7 @@ def main():
                 if sym["code"] == rec["code"]:
                     tff_rows[sym["slug"]][rec["date"]] = to_tff_row(rec, sym["sign_invert"])
                     n += 1
-        # 1URLにつき1行（バグ修正: 以前はレコード毎に出力されていた）
-        print("tff: %s -> %d rows (parsed_total_lines_in_recs=%d)" % (url, n, len(recs)))
-        if n == 0:
-            # 診断用: 何が起きているか手がかりを残す（コード不一致 / 日付形式不一致 等）
-            sample = text[:200].replace("\n", " ")
-            print("  DIAG: 0 matched rows. text sample: %r" % sample)
+        print("tff: %s -> %d rows (%d bytes)" % (url, n, len(text)))
     start_iso = "%04d-01-01" % args.start_year
     for sym in tff_syms:
         rows = {d: r for d, r in tff_rows[sym["slug"]].items() if d >= start_iso}
