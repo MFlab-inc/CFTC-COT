@@ -16,6 +16,7 @@
 """
 
 import argparse
+import io
 import sys
 import zipfile
 from datetime import date
