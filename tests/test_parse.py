@@ -48,6 +48,7 @@ def main():
 
     test_tff()
     test_state()
+    test_tff_legacy_bulk_format()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -120,6 +121,39 @@ def test_state():
     s, _ = tff_alignment([50] * 30, [-9] * 30)
     assert s == "mixed"
     print("STATE TESTS PASSED")
+
+
+
+
+def test_tff_legacy_bulk_format():
+    """TFF統合ZIP(2006-2016)専用の実データ形式を回帰防止として固定化。
+    根拠: 2026-07-27にしょうさんが貼った実際のバックフィルログのDIAG出力
+    （CANADIAN DOLLAR行, MM/DD/YYYY形式・小数表記のOI等）から採取したパターン。
+    """
+    from cot_common import parse_tff_lines, to_tff_row, _normalize_date, _to_int
+
+    assert _normalize_date('"Report_Date_as_YYYY-MM-DD"') is None
+    assert _normalize_date("2026-07-21") == "2026-07-21"
+    assert _normalize_date("12/27/2016 12:00:00 AM") == "2016-12-27"
+    assert _to_int("93212.000000") == 93212
+
+    row = ('"JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE",101019,10/19/2010 12:00:00 AM,097741,'
+           'CME ,00,097 ,250000.000000,50000.000000,20000.000000,3000.000000,'
+           '70000.000000,90000.000000,1000.000000,60000.000000,40000.000000,2000.000000,'
+           '0,0,0,0,0,0,0,0')
+    recs = parse_tff_lines(row, {"097741"})
+    assert len(recs) == 1
+    r = recs[0]
+    assert r["date"] == "2010-10-19"
+    assert r["oi"] == 250000
+    assert r["am_l"] == 70000 and r["am_s"] == 90000
+    assert r["lev_l"] == 60000 and r["lev_s"] == 40000
+
+    out = to_tff_row(r, sign_invert=True)  # usdjpy相当の符号変換も一緒に確認
+    assert out["am_long"] == 90000 and out["am_short"] == -70000
+    assert out["lev_long"] == 40000 and out["lev_short"] == -60000
+
+    print("TFF LEGACY BULK FORMAT TESTS PASSED")
 
 
 if __name__ == "__main__":
