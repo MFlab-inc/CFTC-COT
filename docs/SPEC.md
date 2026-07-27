@@ -1,3 +1,4 @@
+[SPEC.md](https://github.com/user-attachments/files/30417702/SPEC.md)
 # CFTC-COT フィード データ仕様書（v1.2 / 2026-07-27）
 
 ## 1. ソース
@@ -162,3 +163,22 @@ TFF履歴は2006-06-13以降（Legacyの2005年〜より短い）。
 
 検証: tests/test_parse.py の test_state（境界値・勢い・整合の全パターン）＋
 合成120週履歴での通しテスト（extreme/ロング積み増し/divergence_warningの再現）で確認済み。
+
+
+---
+
+## 9. TFF統合ZIP(2006-2016)の日付形式問題と修正（2026-07-27）
+
+**症状**: 統合ZIP（fin_fut_txt_2006_2016.zip）からのマッチ件数が常に0件になっていた。
+
+**原因（実データで特定済み）**: この統合ZIPのみ、日付列の値が
+`MM/DD/YYYY HH:MM:SS AM/PM`（例: `12/27/2016 12:00:00 AM`）形式で格納されている。
+ヘッダーのラベルは他ファイルと同じ「Report_Date_as_YYYY-MM-DD」だが、実データの形式が
+表記と一致していない（CFTC側のエクスポート仕様の不一致、2026-07-27に実データで確認）。
+また同ファイルは数値列も `93212.000000` のような小数表記になっている。
+2017年以降の年次ZIP・週次ファイル・Legacy年次ZIPはいずれもISO日付・整数表記のため
+影響を受けない。
+
+**修正**: `_normalize_date()`（ISO形式とMM/DD/YYYY形式の両方に対応）と
+`_to_int()`の小数フォールバックを追加。`tests/test_parse.py`の
+`test_tff_legacy_bulk_format`に実データパターンを固定化し回帰を防止。
