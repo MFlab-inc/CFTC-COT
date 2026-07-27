@@ -85,8 +85,10 @@ def main():
         try:
             text, _ = fetch_zip_text(url)
         except Exception as e:  # noqa: BLE001
-            print("WARN tff: fetch failed %s (%s) - skip" % (url, e))
+            print("WARN tff: fetch failed %s (%s: %s) - skip"
+                  % (url, type(e).__name__, e))
             continue
+        print("  tff fetched %s: %d bytes" % (url, len(text)))
         recs = parse_tff_lines(text, tff_codes)
         n = 0
         for rec in recs:
@@ -94,7 +96,12 @@ def main():
                 if sym["code"] == rec["code"]:
                     tff_rows[sym["slug"]][rec["date"]] = to_tff_row(rec, sym["sign_invert"])
                     n += 1
-            print("tff: %s -> %d rows" % (url, n))
+        # 1URLにつき1行（バグ修正: 以前はレコード毎に出力されていた）
+        print("tff: %s -> %d rows (parsed_total_lines_in_recs=%d)" % (url, n, len(recs)))
+        if n == 0:
+            # 診断用: 何が起きているか手がかりを残す（コード不一致 / 日付形式不一致 等）
+            sample = text[:200].replace("\n", " ")
+            print("  DIAG: 0 matched rows. text sample: %r" % sample)
     start_iso = "%04d-01-01" % args.start_year
     for sym in tff_syms:
         rows = {d: r for d, r in tff_rows[sym["slug"]].items() if d >= start_iso}
