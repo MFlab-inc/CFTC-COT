@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.0",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-07-27 13:33:08 JST",
+  "generated_at": "2026-07-27 20:39:08 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
