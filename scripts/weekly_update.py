@@ -15,8 +15,9 @@ import sys
 
 from symbols import SYMBOLS, code_map
 from cot_common import (
-    WEEKLY_URL, http_get, parse_legacy_lines, to_feed_row,
+    WEEKLY_URL, TFF_WEEKLY_URL, http_get, parse_legacy_lines, to_feed_row,
     read_symbol_csv, write_symbol_csv, build_feed_json,
+    parse_tff_lines, to_tff_row, read_tff_csv, write_tff_csv,
 )
 
 
@@ -51,6 +52,32 @@ def main():
         changed = True
         print("  [%s] %s written: all=%d long=%d short=%d net=%d"
               % (sym["slug"], row["date"], row["all"], row["long"], row["short"], row["net"]))
+
+    # --- TFF（金融先物のみ: AM / Leveraged Funds） ---
+    tff_syms = [x for x in SYMBOLS if x.get("tff")]
+    tff_codes = {x["code"] for x in tff_syms}
+    try:
+        tff_text = http_get(TFF_WEEKLY_URL).decode("utf-8", errors="replace")
+        tff_recs = parse_tff_lines(tff_text, tff_codes)
+        print("TFF file rows matched: %d" % len(tff_recs))
+        for sym in tff_syms:
+            my = [r for r in tff_recs if r["code"] == sym["code"]]
+            if not my:
+                print("  [%s/tff] not present this week" % sym["slug"])
+                continue
+            row = to_tff_row(my[0], sym["sign_invert"])
+            rows = read_tff_csv(sym["slug"])
+            if rows.get(row["date"]) == row:
+                print("  [%s/tff] %s already up to date (am_net=%d lev_net=%d)"
+                      % (sym["slug"], row["date"], row["am_net"], row["lev_net"]))
+                continue
+            rows[row["date"]] = row
+            write_tff_csv(sym["slug"], rows)
+            changed = True
+            print("  [%s/tff] %s written: am_net=%d lev_net=%d"
+                  % (sym["slug"], row["date"], row["am_net"], row["lev_net"]))
+    except Exception as e:  # noqa: BLE001
+        print("WARN: TFF fetch failed (%s) - legacy data is unaffected" % e)
 
     if changed:
         build_feed_json(SYMBOLS, generated_note="weekly update from %s" % WEEKLY_URL)

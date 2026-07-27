@@ -22,6 +22,7 @@ fallback_codes:
 SYMBOLS = [
     {
         "slug": "usdjpy",
+        "tff": True,
         "label": "USD/JPY",
         "code": "097741",
         "market_hint": "JAPANESE YEN",
@@ -31,6 +32,7 @@ SYMBOLS = [
     },
     {
         "slug": "gbpusd",
+        "tff": True,
         "label": "GBP/USD",
         "code": "096742",
         "market_hint": "BRITISH POUND",
@@ -40,6 +42,7 @@ SYMBOLS = [
     },
     {
         "slug": "eurusd",
+        "tff": True,
         "label": "EUR/USD",
         "code": "099741",
         "market_hint": "EURO FX",
@@ -49,6 +52,7 @@ SYMBOLS = [
     },
     {
         "slug": "audusd",
+        "tff": True,
         "label": "AUD/USD",
         "code": "232741",
         "market_hint": "AUSTRALIAN DOLLAR",
@@ -58,6 +62,7 @@ SYMBOLS = [
     },
     {
         "slug": "sp500",
+        "tff": True,
         "label": "S&P500",
         "code": "13874+",
         "market_hint": "S&P 500 Consolidated",
@@ -67,6 +72,7 @@ SYMBOLS = [
     },
     {
         "slug": "nikkei225",
+        "tff": True,
         "label": "NIKKEI225",
         "code": "240743",
         "market_hint": "NIKKEI STOCK AVERAGE YEN DENOM",
@@ -76,6 +82,7 @@ SYMBOLS = [
     },
     {
         "slug": "nydow",
+        "tff": True,
         "label": "NYダウ",
         "code": "12460+",
         "market_hint": "DJIA Consolidated",
@@ -85,6 +92,7 @@ SYMBOLS = [
     },
     {
         "slug": "wti",
+        "tff": False,
         "label": "WTI原油",
         "code": "067651",
         "market_hint": "CRUDE OIL",
@@ -94,6 +102,7 @@ SYMBOLS = [
     },
     {
         "slug": "gold",
+        "tff": False,
         "label": "GOLD",
         "code": "088691",
         "market_hint": "GOLD",
@@ -103,6 +112,7 @@ SYMBOLS = [
     },
     {
         "slug": "copper",
+        "tff": False,
         "label": "銅",
         "code": "085692",
         "market_hint": "COPPER",
@@ -112,6 +122,7 @@ SYMBOLS = [
     },
     {
         "slug": "us10y",
+        "tff": True,
         "label": "米10年債",
         "code": "043602",
         "market_hint": "UST 10Y NOTE",

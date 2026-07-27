@@ -9,45 +9,77 @@
 <style>
 :root{
   --bg:#EEF1F4; --panel:#FFFFFF; --ink:#1B2733; --sub:#5B6B7A;
-  --line:#D7DEE5; --accent:#3A5BC7; --pos:#1E7F5C; --neg:#C43D3D;
+  --line:#D7DEE5; --accent:#3A5BC7; --accent2:#C7713A;
+  --pos:#1E7F5C; --neg:#C43D3D;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans JP',sans-serif;
   font-size:14px;line-height:1.6;padding:24px 16px 64px}
-.wrap{max-width:980px;margin:0 auto}
+.wrap{max-width:1040px;margin:0 auto}
 header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;
   border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px}
 h1{font-size:20px;font-weight:700;letter-spacing:.02em}
 h1 small{font-weight:400;color:var(--sub);font-size:13px;margin-left:8px}
 .meta{font-family:var(--mono);font-size:12px;color:var(--sub)}
-.note{font-size:12px;color:var(--sub);margin:8px 0 20px}
+.note{font-size:12px;color:var(--sub);margin:8px 0 16px}
+.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--ink)}
+.tabs button{appearance:none;border:1px solid var(--line);border-bottom:none;
+  background:var(--bg);color:var(--sub);font:inherit;font-size:13px;font-weight:500;
+  padding:8px 18px;cursor:pointer;margin-right:4px;border-radius:4px 4px 0 0}
+.tabs button[aria-selected="true"]{background:var(--panel);color:var(--ink);
+  font-weight:700;border-color:var(--ink);position:relative;top:1px;
+  border-bottom:1px solid var(--panel)}
+.tabnote{font-size:12px;color:var(--sub);margin:10px 0 12px}
 table{width:100%;border-collapse:collapse;background:var(--panel)}
 th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;
   font-family:var(--mono);font-size:13px;white-space:nowrap}
 th{font-family:'IBM Plex Sans JP',sans-serif;font-size:12px;font-weight:500;
   color:var(--sub);text-align:right;border-bottom:1px solid var(--ink)}
 th:first-child,td:first-child{text-align:left}
+th.grp{border-left:1px solid var(--line)} td.grp{border-left:1px solid var(--line)}
 td.sym{font-family:'IBM Plex Sans JP',sans-serif;font-weight:700;font-size:13px}
 td.sym a{color:var(--ink);text-decoration:none}
 td.sym a:hover,td.sym a:focus-visible{color:var(--accent);text-decoration:underline}
 td.sym .code{display:block;font-weight:400;font-size:11px;color:var(--sub);
   font-family:var(--mono)}
 .pos{color:var(--pos)} .neg{color:var(--neg)}
-/* signature: ゼロ軸から左右に伸びるネットポジションバー（52週最大比） */
 .bar{width:150px;padding:0 6px}
 .bar .axis{position:relative;height:14px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
 .bar i{position:absolute;top:2px;bottom:2px;display:block}
 .bar i.p{left:50%;background:var(--pos);border-radius:0 2px 2px 0}
 .bar i.n{right:50%;background:var(--neg);border-radius:2px 0 0 2px}
-.spark{width:120px;padding:0 6px}
+.spark{width:130px;padding:0 6px}
 .spark svg{display:block}
-.spark path{fill:none;stroke:var(--accent);stroke-width:1.4}
+.spark path{fill:none;stroke-width:1.4}
+.spark path.l1{stroke:var(--accent)}
+.spark path.l2{stroke:var(--accent2)}
 .spark line{stroke:var(--line);stroke-width:1}
+.legend{display:inline-flex;gap:14px;align-items:center;font-size:12px;color:var(--sub)}
+.legend i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:4px}
+.badge{display:inline-block;border-radius:3px;padding:0 7px;font-size:11.5px;
+  font-family:'IBM Plex Sans JP',sans-serif;font-weight:700;border:1px solid}
+.b-neutral{color:var(--sub);border-color:var(--line);background:var(--bg)}
+.b-biased{color:#8A5A00;border-color:#D9B36A;background:#FBF3E2}
+.b-extreme{color:#8F1F1F;border-color:#DE9A9A;background:#FBE9E9}
+.b-aligned{color:#155E44;border-color:#8FC7B2;background:#E7F4EE}
+.b-warn{color:#8F1F1F;border-color:#DE9A9A;background:#FBE9E9}
+.b-mixed{color:var(--sub);border-color:var(--line);background:var(--bg)}
+td.state{font-size:11.5px;text-align:left}
+td.state .mom{display:block;color:var(--sub);font-family:'IBM Plex Sans JP',sans-serif;font-size:11px}
+details.guide{background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--accent);padding:10px 14px;margin:0 0 16px;font-size:12.5px}
+details.guide summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--ink);
+  font-family:'IBM Plex Sans JP',sans-serif}
+details.guide .g{margin:10px 0 4px;color:var(--ink)}
+details.guide .g b.tag{display:inline-block;background:var(--bg);border:1px solid var(--line);
+  border-radius:3px;padding:0 6px;margin-right:6px;font-size:11.5px;color:var(--sub)}
+details.guide .caveat{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);
+  color:var(--sub)}
 #status{padding:32px;text-align:center;color:var(--sub)}
 footer{margin-top:28px;font-size:12px;color:var(--sub)}
 footer a{color:var(--accent)}
-@media(max-width:720px){
+@media(max-width:760px){
   .spark{display:none}
   .bar{width:96px}
   th,td{padding:8px 6px;font-size:12px}
@@ -57,25 +89,89 @@ footer a{color:var(--accent)}
 <body>
 <div class="wrap">
   <header>
-    <h1>CFTC COT Feed<small>非商業（投機筋）建玉・先物限定</small></h1>
+    <h1>CFTC COT Feed<small>建玉ポジション・先物限定</small></h1>
     <span class="meta" id="asof">読み込み中…</span>
   </header>
   <p class="note">
-    出典：CFTC Legacy Futures-Only（スプレッド除く）。USD/JPYは円先物をUSD/JPY方向に符号変換済み
-    （net プラス＝投機筋の円ショート優勢）。数値の確定ソースはCFTC公式のみ。
+    出典：CFTC公式COTレポート。USD/JPYは円先物をUSD/JPY方向に符号変換済み
+    （net プラス＝円ショート優勢＝USD/JPY買い方向）。数値の確定ソースはCFTC公式のみ。<br>
+    <b>グラフの見方</b>：52週推移のグレー横線と、netバー中央の縦線はいずれも<b>0軸（ネット±0）</b>。
+    線より上（バーは右・緑）＝ネットロング、下（バーは左・赤）＝ネットショート。<br>
+    <b>状態バッジ</b>は仮置き閾値（極端: 上下10%圏／偏り: 上下25%圏／勢い: 4週差分／
+    LevFゼロクロス: 直近8週）による機械的な参考表示であり、<b>売買助言ではありません</b>。
   </p>
+
+  <details class="guide">
+    <summary>📖 データの読み方（トレード活用ガイド）</summary>
+    <p class="g"><b class="tag">Legacy 非商業</b>
+      大口投機筋全体の標準数値（履歴2005年〜）。強みは履歴の長さで、
+      現在のnetが<b>過去全期間の中で何パーセンタイルか＝偏りの極端度</b>の判定に最適。
+      極端な偏り（例: 上位/下位10%圏）はクラウデッドトレードであり、
+      反対方向へ巻き戻された時の値幅が大きくなる（2024年8月5日の円ショート巻き戻しが典型例）。
+      週次レポートの引用にはこの数値を使う。</p>
+    <p class="g"><b class="tag">TFF: AM</b>
+      アセットマネジャー（年金・保険・投信等のリアルマネー）。動きが遅く、
+      一度決めた方向を数ヶ月〜年単位で維持しやすい。
+      <b>中期スイングの方向バイアス確認</b>に向く。</p>
+    <p class="g"><b class="tag">TFF: LevF</b>
+      レバレッジド・ファンド（ヘッジファンド・CTA）。モメンタム・キャリーで素早く動き、
+      転換点で先に反転しやすい。<b>LevFの極端な偏り＝踏み上げ（スクイーズ）リスクの先行指標</b>として、
+      スイングのエントリー・利確タイミングの参考になる。</p>
+    <p class="g"><b class="tag">乖離の読み方</b>
+      LevFが先に反転しAMがまだ旧方向 → <b>転換初期の可能性</b>。
+      AMとLevFが同方向に揃う → <b>持続性の高いトレンド</b>。
+      52週推移の2本線（青=AM／橙=LevF）の交差・乖離で目視確認できる。</p>
+    <p class="caveat">注意: COTは火曜締め・金曜公表（3日遅れ・週次）の環境認識データであり、
+      単独の売買シグナルではない。先物ポジションはFX市場全体の一部のサンプルである点にも留意。
+      状態バッジの閾値はすべて仮置きであり、運用実測に基づき今後調整する。</p>
+  </details>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-legacy" aria-selected="true">投機筋（Legacy）</button>
+    <button role="tab" id="tab-tff" aria-selected="false">AM／ヘッジファンド（TFF）</button>
+  </div>
+
   <div id="status">cot-feed.json を読み込んでいます…</div>
-  <table id="tbl" hidden>
-    <thead>
-      <tr>
+
+  <section id="pane-legacy" hidden>
+    <p class="tabnote">
+      Legacyレポートの<b>非商業（大口投機筋全体）</b>・スプレッド除く。履歴2005年〜。
+      報道の「IMM通貨先物ポジション」に相当する標準数値。全11銘柄対象。
+    </p>
+    <table>
+      <thead><tr>
         <th>銘柄</th><th>締め日</th><th>総建玉</th><th>long</th><th>short</th>
-        <th>net</th><th>前週比</th><th>net（52週最大比）</th><th>52週推移</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+        <th>net</th><th>前週比</th><th class="grp">状態（偏り度・勢い）</th><th>net（52週最大比）</th><th>52週推移</th>
+      </tr></thead>
+      <tbody id="rows-legacy"></tbody>
+    </table>
+  </section>
+
+  <section id="pane-tff" hidden>
+    <p class="tabnote">
+      TFFレポート（金融先物のみ・履歴2006/6/13〜）。
+      <b>AM＝アセットマネジャー（年金・保険・投信等の機関投資家）</b>／
+      <b>LevF＝レバレッジド・ファンド（ヘッジファンド・CTA）</b>。スプレッド除く。
+      WTI・GOLD・銅は対象外。Legacyの非商業とは分類体系が異なるため合計は一致しません。
+      <span class="legend" style="margin-left:8px">
+        <span><i style="background:var(--accent)"></i>AM net</span>
+        <span><i style="background:var(--accent2)"></i>LevF net</span>
+      </span>
+    </p>
+    <table>
+      <thead><tr>
+        <th>銘柄</th><th>締め日</th>
+        <th class="grp">AM long</th><th>AM short</th><th>AM net</th><th>前週比</th>
+        <th class="grp">LevF long</th><th>LevF short</th><th>LevF net</th><th>前週比</th>
+        <th class="grp">整合状態</th><th class="grp">52週推移</th>
+      </tr></thead>
+      <tbody id="rows-tff"></tbody>
+    </table>
+  </section>
+
   <footer>
-    データ：<a href="data/cot-feed.json">cot-feed.json</a> ／ 銘柄別CSVは表の銘柄名リンクから。
+    データ：<a href="data/cot-feed.json">cot-feed.json</a> ／
+    銘柄別CSVは銘柄名リンク（Legacy）から。TFF版は同名の <span class="meta">_tff.csv</span>。
     週次更新：毎週土曜 9:30 JST（COT公表後・祝日順延時は翌火曜に回収）。
     一次ソース：<a href="https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm">CFTC Commitments of Traders</a>
   </footer>
@@ -85,26 +181,121 @@ const fmt = n => n === null || n === undefined ? "—" : n.toLocaleString("en-US
 const signed = n => (n > 0 ? "+" : "") + fmt(n);
 const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "";
 
-function sparkline(rows){
-  if(!rows || rows.length < 2) return "";
-  const w = 110, h = 26, pad = 2;
-  const nets = rows.map(r => r.net);
-  const min = Math.min(...nets, 0), max = Math.max(...nets, 0);
-  const x = i => pad + i * (w - pad * 2) / (nets.length - 1);
-  const y = v => max === min ? h / 2 : pad + (max - v) * (h - pad * 2) / (max - min);
-  const d = nets.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
-  const zero = y(0).toFixed(1);
-  return `<svg width="${w}" height="${h}" role="img" aria-label="net 52週推移">` +
-         `<line x1="0" y1="${zero}" x2="${w}" y2="${zero}"></line>` +
-         `<path d="${d}"></path></svg>`;
+function sparkSvg(seriesList){
+  // seriesList: [{vals:[..], cls:"l1"}, ...] 共通スケール・0軸線つき
+  const w = 120, h = 26, pad = 2;
+  const all = seriesList.flatMap(s => s.vals);
+  if(all.length < 2) return "";
+  const min = Math.min(...all, 0), max = Math.max(...all, 0);
+  const y = v => max === min ? h/2 : pad + (max - v) * (h - pad*2) / (max - min);
+  let paths = "";
+  for(const s of seriesList){
+    if(s.vals.length < 2) continue;
+    const x = i => pad + i * (w - pad*2) / (s.vals.length - 1);
+    const d = s.vals.map((v,i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+    paths += `<path class="${s.cls}" d="${d}"></path>`;
+  }
+  return `<svg width="${w}" height="${h}" role="img">` +
+         `<line x1="0" y1="${y(0).toFixed(1)}" x2="${w}" y2="${y(0).toFixed(1)}"></line>` +
+         paths + `</svg>`;
 }
 
-function netBar(net, rows){
-  const maxAbs = Math.max(1, ...(rows || []).map(r => Math.abs(r.net)));
-  const pct = Math.min(50, Math.abs(net) / maxAbs * 50);
-  const side = net >= 0 ? "p" : "n";
-  return `<div class="axis"><i class="${side}" style="width:${pct.toFixed(1)}%"></i></div>`;
+function netBar(net, maxAbs){
+  const pct = Math.min(50, Math.abs(net) / Math.max(1, maxAbs) * 50);
+  return `<div class="axis"><i class="${net >= 0 ? "p" : "n"}" style="width:${pct.toFixed(1)}%"></i></div>`;
 }
+
+const BIAS_JP = {neutral: "中立", biased: "偏り", extreme: "極端"};
+const BIAS_CLS = {neutral: "b-neutral", biased: "b-biased", extreme: "b-extreme"};
+
+function stateCell(st){
+  if(!st || st.percentile_all === null || st.percentile_all === undefined)
+    return `<td class="state grp">—</td>`;
+  const b = `<span class="badge ${BIAS_CLS[st.bias] || "b-neutral"}">` +
+            `${BIAS_JP[st.bias] || "—"} p=${st.percentile_all}%</span>`;
+  const mom = st.momentum_label ? `<span class="mom">${st.momentum_label}` +
+              (st.momentum_4w !== null ? `（4週 ${signed(st.momentum_4w)}）` : "") + `</span>` : "";
+  return `<td class="state grp">${b}${mom}</td>`;
+}
+
+function alignCell(st){
+  if(!st || !st.alignment) return `<td class="state grp">—</td>`;
+  const map = {
+    aligned: ["整合（持続性高）", "b-aligned"],
+    divergence_warning: ["乖離（転換警戒）", "b-warn"],
+    mixed: ["不一致", "b-mixed"],
+  };
+  const [label, klass] = map[st.alignment] || ["—", "b-mixed"];
+  const sub = st.alignment === "divergence_warning" && st.levf_zerocross_weeks_ago !== null
+    ? `<span class="mom">LevF反転 ${st.levf_zerocross_weeks_ago}週前</span>` : "";
+  return `<td class="state grp"><span class="badge ${klass}">${label}</span>${sub}</td>`;
+}
+
+const ORDER = ["usdjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
+               "nydow","wti","gold","copper","us10y"];
+
+function renderLegacy(feed){
+  const tb = document.getElementById("rows-legacy");
+  for(const slug of ORDER){
+    const s = feed.symbols[slug]; if(!s) continue;
+    const L = s.latest, C = s.change_1w;
+    const maxAbs = Math.max(1, ...(s.weeks_52||[]).map(r => Math.abs(r.net)));
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      `<td class="sym"><a href="data/csv/${slug}.csv">${s.label}</a>` +
+      `<span class="code">${s.cftc_code}</span></td>` +
+      (L ? `<td>${L.date}</td><td>${fmt(L.all)}</td><td>${fmt(L.long)}</td>` +
+           `<td class="neg">${fmt(L.short)}</td>` +
+           `<td class="${cls(L.net)}">${signed(L.net)}</td>` +
+           `<td class="${C ? cls(C.net) : ""}">${C ? signed(C.net) : "—"}</td>` +
+           stateCell(s.state) +
+           `<td class="bar">${netBar(L.net, maxAbs)}</td>` +
+           `<td class="spark">${sparkSvg([{vals:(s.weeks_52||[]).map(r=>r.net), cls:"l1"}])}</td>`
+         : `<td colspan="9">データ未生成（バックフィル未実行）</td>`);
+    tb.appendChild(tr);
+  }
+}
+
+function renderTff(feed){
+  const tb = document.getElementById("rows-tff");
+  for(const slug of ORDER){
+    const s = feed.symbols[slug]; if(!s) continue;
+    const t = s.tff;
+    const tr = document.createElement("tr");
+    const head = `<td class="sym"><a href="data/csv/${slug}_tff.csv">${s.label}</a>` +
+                 `<span class="code">${s.cftc_code}</span></td>`;
+    if(!t){
+      tr.innerHTML = head + `<td colspan="11">TFF対象外（商品先物）</td>`;
+    } else if(!t.available || !t.latest){
+      tr.innerHTML = head + `<td colspan="11">未取得（バックフィル未実行）</td>`;
+    } else {
+      const L = t.latest, C = t.change_1w;
+      tr.innerHTML = head +
+        `<td>${L.date}</td>` +
+        `<td class="grp">${fmt(L.am_long)}</td><td class="neg">${fmt(L.am_short)}</td>` +
+        `<td class="${cls(L.am_net)}">${signed(L.am_net)}</td>` +
+        `<td class="${C ? cls(C.am_net) : ""}">${C ? signed(C.am_net) : "—"}</td>` +
+        `<td class="grp">${fmt(L.lev_long)}</td><td class="neg">${fmt(L.lev_short)}</td>` +
+        `<td class="${cls(L.lev_net)}">${signed(L.lev_net)}</td>` +
+        `<td class="${C ? cls(C.lev_net) : ""}">${C ? signed(C.lev_net) : "—"}</td>` +
+        alignCell(t.state) +
+        `<td class="spark grp">${sparkSvg([
+           {vals:(t.weeks_52||[]).map(r=>r.am_net), cls:"l1"},
+           {vals:(t.weeks_52||[]).map(r=>r.lev_net), cls:"l2"}])}</td>`;
+    }
+    tb.appendChild(tr);
+  }
+}
+
+function setTab(which){
+  const isL = which === "legacy";
+  document.getElementById("tab-legacy").setAttribute("aria-selected", isL);
+  document.getElementById("tab-tff").setAttribute("aria-selected", !isL);
+  document.getElementById("pane-legacy").hidden = !isL;
+  document.getElementById("pane-tff").hidden = isL;
+}
+document.getElementById("tab-legacy").addEventListener("click", () => setTab("legacy"));
+document.getElementById("tab-tff").addEventListener("click", () => setTab("tff"));
 
 fetch("data/cot-feed.json", {cache: "no-store"})
   .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
@@ -112,28 +303,10 @@ fetch("data/cot-feed.json", {cache: "no-store"})
     document.getElementById("asof").textContent =
       "対象週(火曜締め): " + (feed.meta.report_date_latest || "—") +
       " ／ 生成: " + feed.meta.generated_at;
-    const order = ["usdjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
-                   "nydow","wti","gold","copper","us10y"];
-    const tb = document.getElementById("rows");
-    for(const slug of order){
-      const s = feed.symbols[slug];
-      if(!s) continue;
-      const L = s.latest, C = s.change_1w;
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        `<td class="sym"><a href="data/csv/${slug}.csv">${s.label}</a>` +
-        `<span class="code">${s.cftc_code}</span></td>` +
-        (L ? `<td>${L.date}</td><td>${fmt(L.all)}</td><td>${fmt(L.long)}</td>` +
-             `<td class="neg">${fmt(L.short)}</td>` +
-             `<td class="${cls(L.net)}">${signed(L.net)}</td>` +
-             `<td class="${C ? cls(C.net) : ""}">${C ? signed(C.net) : "—"}</td>` +
-             `<td class="bar">${netBar(L.net, s.weeks_52)}</td>` +
-             `<td class="spark">${sparkline(s.weeks_52)}</td>`
-           : `<td colspan="8">データ未生成（バックフィル未実行）</td>`);
-      tb.appendChild(tr);
-    }
+    renderLegacy(feed);
+    renderTff(feed);
     document.getElementById("status").hidden = true;
-    document.getElementById("tbl").hidden = false;
+    setTab("legacy");
   })
   .catch(e => {
     document.getElementById("status").textContent =

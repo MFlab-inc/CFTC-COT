@@ -1,4 +1,4 @@
-# CFTC-COT フィード データ仕様書（v1.0 / 2026-07-27）
+# CFTC-COT フィード データ仕様書（v1.2 / 2026-07-27）
 
 ## 1. ソース
 
@@ -96,3 +96,69 @@ NYMEX/COMEX/CBOT掲載のため同一ファイル内の該当取引所セクシ�
 3. 期間表現（「○週連続」等）の自前計算・記載は品質基準文書 4-2 に従い行わない
 4. フィード利用時は `meta.generated_at` と `report_date_latest` を確認し、
    取得時刻を記録する
+
+
+---
+
+## 7. TFF拡張（v1.1 / 2026-07-27追加）
+
+**目的**: アセットマネジャー（機関投資家等）とレバレッジド・ファンド（ヘッジファンド等）の
+建玉を追加配信する。**TFF（Traders in Financial Futures）は金融先物のみが対象**のため、
+対象は8銘柄（usdjpy/gbpusd/eurusd/audusd/sp500/nikkei225/nydow/us10y）。
+WTI・GOLD・銅は対象外（JSONでは `tff: null`）。
+
+### 7-1. ソース（検証済み）
+
+| 区分 | URL |
+|---|---|
+| 週次 | https://www.cftc.gov/dea/newcot/FinFutWk.txt |
+| 履歴 2006-06-13〜2016 | https://www.cftc.gov/files/dea/history/fin_fut_txt_2006_2016.zip |
+| 履歴 2017〜 | https://www.cftc.gov/files/dea/history/fut_fin_txt_{YYYY}.zip |
+
+フィールド位置（0起点・ヘッダなし）: [7]=OI, [11]/[12]=Asset Manager L/S,
+[14]/[15]=Leveraged Funds L/S（スプレッドは[13]/[16]で不使用）。
+**検証記録**: JAPANESE YEN 2026-07-07行で「Σ各区分L＋Σスプレッド＋非報告L＝
+Tot Rept L(354,660)＋非報告L(43,443)＝OI(398,103)」の恒等式成立を確認。
+同行のOIはLegacyフィードの同週OIとも完全一致。
+
+### 7-2. 出力
+
+- CSV: `data/csv/{slug}_tff.csv` 列=`date,all,am_long,am_short,am_net,lev_long,lev_short,lev_net`
+- JSON: `symbols.{slug}.tff` に coverage / latest / prev / change_1w / weeks_52（am_net・lev_netのみ）
+- 符号規則はLegacy側と同一（usdjpyのみUSD/JPY方向に反転。
+  例: 2026-07-07 usdjpy → am_net=+48,653・lev_net=+90,083＝AM・HFとも円ショート優勢）
+
+### 7-3. 注意（分類体系の違い）
+
+LegacyのNon-Commercial（非商業）とTFFのAM＋Leveraged Fundsは**分類体系が異なる別レポート**であり、
+合計しても一致しない（例: 2026-07-07 usdjpy Legacy net=+123,778 vs AM+Lev=+138,736）。
+レポートに併記する場合は出典レポート名（Legacy／TFF）を必ず区別して明記する。
+TFF履歴は2006-06-13以降（Legacyの2005年〜より短い）。
+
+
+---
+
+## 8. 状態表示（v1.2 / 2026-07-27追加）
+
+**位置付け**: 機械的な仮置き閾値による参考表示であり、**売買助言ではない**
+（フィードmeta.state_thresholds に閾値と免責を転記。閾値は運用実測で調整可能）。
+
+### 8-1. Legacy: `symbols.{slug}.state`
+
+| キー | 定義 |
+|---|---|
+| percentile_all | 現在netの全履歴パーセンタイル（当該値以下の割合×100） |
+| bias | extreme（p≤10 or p≥90）/ biased（p≤25 or p≥75）/ neutral（境界は外側に割当て=保守側） |
+| side | long / short / flat（netの符号） |
+| momentum_4w / momentum_label | netの4週差分と方向ラベル（積み増し/縮小/横ばい） |
+
+### 8-2. TFF: `symbols.{slug}.tff.state`
+
+| キー | 定義 |
+|---|---|
+| alignment | aligned（AM・LevF符号一致=持続性高）/ divergence_warning（不一致かつLevFが直近8週内にゼロクロス=転換警戒）/ mixed（不一致・直近クロスなし） |
+| levf_zerocross_weeks_ago | LevFの直近ゼロクロスが何週前か（8週超はnull） |
+| lev_percentile_all / lev_bias | LevF netの全履歴パーセンタイルと偏り度（スクイーズリスクの目安） |
+
+検証: tests/test_parse.py の test_state（境界値・勢い・整合の全パターン）＋
+合成120週履歴での通しテスト（extreme/ロング積み増し/divergence_warningの再現）で確認済み。

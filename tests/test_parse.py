@@ -46,9 +46,80 @@ def main():
     assert row2["long"] == 66184 and row2["short"] == -103869
     assert row2["net"] == 66184 - 103869
 
+    test_tff()
+    test_state()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
+
+
+
+
+# ============================================================
+# TFF テスト（v1.1）
+# フィクスチャの根拠: CFTC公式 FinFutWk.txt 実データ（2026-07-07行、2026-07-27取得）
+#   JAPANESE YEN: OI=398,103 / AM L=74,113 S=122,766 / Lev L=84,990 S=175,073
+#   （恒等式 ΣL+ΣSpread+NonRept L = OI の成立を確認済みの行）
+# ============================================================
+
+TFF_FIXTURE = '\n'.join([
+    '"JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE",260707,2026-07-07,097741,CME ,00,097 ,  398103,  108938,   21659,    3379,   74113,  122766,   24861,   84990,  175073,    2463,   54132,    3630,    1784,  354660,  355615,   43443,   42488',
+    '"AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE",260707,2026-07-07,232741,CME ,00,232 ,  204837,   43854,   52266,     513,   52455,   89758,    5978,   59300,   29617,    6045,    2677,     500,       0,  170822,  184677,   34015,   20160',
+])
+
+
+def test_tff():
+    from cot_common import parse_tff_lines, to_tff_row
+    recs = parse_tff_lines(TFF_FIXTURE, {"097741", "232741"})
+    assert len(recs) == 2, recs
+
+    jpy = [r for r in recs if r["code"] == "097741"][0]
+    assert jpy["oi"] == 398103
+    assert jpy["am_l"] == 74113 and jpy["am_s"] == 122766
+    assert jpy["lev_l"] == 84990 and jpy["lev_s"] == 175073
+
+    row = to_tff_row(jpy, sign_invert=True)
+    # USD/JPY方向: AMの円ショート122,766がam_long、円ロング74,113が負のam_short
+    assert row["am_long"] == 122766 and row["am_short"] == -74113
+    assert row["am_net"] == 48653
+    assert row["lev_long"] == 175073 and row["lev_short"] == -84990
+    assert row["lev_net"] == 90083
+    assert row["all"] == 398103
+
+    aud = [r for r in recs if r["code"] == "232741"][0]
+    row2 = to_tff_row(aud, sign_invert=False)
+    assert row2["am_long"] == 52455 and row2["am_short"] == -89758
+    assert row2["am_net"] == 52455 - 89758
+    assert row2["lev_long"] == 59300 and row2["lev_short"] == -29617
+    assert row2["lev_net"] == 29683
+
+    print("TFF TESTS PASSED")
+    print("  usdjpy tff 2026-07-07:", {k: row[k] for k in ("am_net", "lev_net")})
+    print("  audusd tff 2026-07-07:", {k: row2[k] for k in ("am_net", "lev_net")})
+
+
+
+
+def test_state():
+    """v1.2 状態判定の検証（仮置き閾値: extreme 10/90, biased 25/75, 4週勢い, LevFクロス8週）"""
+    from cot_common import (percentile_of_last, classify_bias,
+                            momentum_state, tff_alignment)
+    assert percentile_of_last(list(range(1, 101))) == 100.0
+    assert percentile_of_last(list(range(100, 0, -1))) == 1.0
+    assert classify_bias(10) == "extreme" and classify_bias(90) == "extreme"
+    assert classify_bias(25) == "biased" and classify_bias(75) == "biased"
+    assert classify_bias(50) == "neutral" and classify_bias(10.1) == "biased"
+    d, l = momentum_state([10, 20, 30, 40, 50, 60])
+    assert d == 40 and l == "ロング積み増し"
+    d, l = momentum_state([-60, -50, -40, -30, -20, -10])
+    assert d == 40 and l == "ショート縮小"
+    s, _ = tff_alignment([50] * 10, [30] * 10)
+    assert s == "aligned"
+    s, w = tff_alignment([50] * 10, [5, 4, 3, 2, 1, -1, -2, -3, -4, -5])
+    assert s == "divergence_warning" and w is not None
+    s, _ = tff_alignment([50] * 30, [-9] * 30)
+    assert s == "mixed"
+    print("STATE TESTS PASSED")
 
 
 if __name__ == "__main__":
