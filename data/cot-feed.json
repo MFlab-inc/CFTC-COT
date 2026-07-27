@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-07-27 22:00:53 JST",
+  "generated_at": "2026-07-27 22:09:42 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -440,9 +440,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -733,7 +733,7 @@
     "state": {
      "alignment": "aligned",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 97.0,
+     "lev_percentile_all": 94.9,
      "lev_bias": "extreme"
     }
    }
@@ -1145,9 +1145,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -1438,8 +1438,8 @@
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 80.6,
-     "lev_bias": "biased"
+     "lev_percentile_all": 74.3,
+     "lev_bias": "neutral"
     }
    }
   },
@@ -1850,9 +1850,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -2143,8 +2143,8 @@
     "state": {
      "alignment": "divergence_warning",
      "levf_zerocross_weeks_ago": 6,
-     "lev_percentile_all": 22.2,
-     "lev_bias": "biased"
+     "lev_percentile_all": 27.5,
+     "lev_bias": "neutral"
     }
    }
   },
@@ -2555,9 +2555,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -2848,8 +2848,8 @@
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 81.2,
-     "lev_bias": "biased"
+     "lev_percentile_all": 61.4,
+     "lev_bias": "neutral"
     }
    }
   },
@@ -3260,9 +3260,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2010-06-15",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 841
     },
     "latest": {
      "date": "2026-07-21",
@@ -3553,7 +3553,7 @@
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 19.4,
+     "lev_percentile_all": 11.5,
      "lev_bias": "biased"
     }
    }
@@ -3965,9 +3965,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -4258,7 +4258,7 @@
     "state": {
      "alignment": "aligned",
      "levf_zerocross_weeks_ago": 3,
-     "lev_percentile_all": 40.9,
+     "lev_percentile_all": 31.6,
      "lev_bias": "neutral"
     }
    }
@@ -4670,9 +4670,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2010-06-15",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 841
     },
     "latest": {
      "date": "2026-07-21",
@@ -4963,7 +4963,7 @@
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 16.6,
+     "lev_percentile_all": 11.1,
      "lev_bias": "biased"
     }
    }
@@ -6590,9 +6590,9 @@
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
-     "first_date": "2017-01-03",
+     "first_date": "2006-06-13",
      "last_date": "2026-07-21",
-     "weeks": 499
+     "weeks": 1050
     },
     "latest": {
      "date": "2026-07-21",
@@ -6883,7 +6883,7 @@
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 7.0,
+     "lev_percentile_all": 3.3,
      "lev_bias": "extreme"
     }
    }
