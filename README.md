@@ -101,7 +101,7 @@ COT公表は通常 **米国時間 金曜 15:30 ET**（データは同週火曜�
 export PYTHONPATH=scripts
 python scripts/backfill.py --start-year 2005   # 履歴再構築
 python scripts/weekly_update.py                # 最新週の取り込み
-python tests/test_parse.py                     # パーサ・符号規則テスト（全6ブロック）
+python tests/test_parse.py                     # パーサ・符号規則テスト（全10ブロック）
 python -m py_compile scripts/*.py tests/*.py   # 編集後の構文チェック
 ```
 

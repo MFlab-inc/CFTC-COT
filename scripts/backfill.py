@@ -208,9 +208,15 @@ def main():
     for kind, url, err in failures:
         print("    FAIL %-6s %s  (%s)" % (kind, url, err))
     if empty_legacy:
-        print("  FATAL: Legacy側に0週の銘柄があります: %s" % empty_legacy)
-    if failures or empty_legacy:
-        if args.allow_partial and not empty_legacy:
+        print("  ERROR: Legacy側に0週の銘柄があります: %s" % empty_legacy)
+    if empty_tff:
+        print("  ERROR: tff=True なのに0週の銘柄があります: %s" % empty_tff)
+    if failures or empty_legacy or empty_tff:
+        # --allow-partial は「空」も救済する。開始年が遅い銘柄（eurjpyは2017〜）は
+        # 狭い年範囲でバックフィルすると正当に0週になり得るため、ここを
+        # 救済不可にすると範囲指定のバックフィルが常に失敗してしまう。
+        # 一方、週数の減少（＝データ消失）は上で無条件に止めており救済されない。
+        if args.allow_partial:
             print("  RESULT: DEGRADED (--allow-partial のため正常終了扱い)")
             return 0
         print("  RESULT: FAILED - このrunは失敗として扱われ、data/ はcommitされません。")

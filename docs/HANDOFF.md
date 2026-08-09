@@ -63,7 +63,8 @@ CFTC-COT/
 export PYTHONPATH=scripts
 python scripts/backfill.py --start-year 2005   # 履歴再構築（全銘柄・Legacy+TFF）
 python scripts/weekly_update.py                # 最新週の取り込み
-python tests/test_parse.py                     # 全テスト（4ブロック・全件合格が正常）
+python tests/test_parse.py                     # 全テスト（10ブロック・全件合格が正常）
+                                               # ※CIでも自動実行される
 ```
 
 ---
@@ -197,10 +198,13 @@ meta:
   source{weekly, historical, note} / schema{各列の説明} / state_thresholds / notes
 symbols.{slug}:
   label / cftc_code / sign_convention / note
-  coverage{first_date, last_date, weeks, span_weeks, present_ratio, contiguous}
+  coverage{first_date, last_date, weeks, span_weeks, present_ratio, max_gap_days, contiguous}
     # weeks は「保存されている行数」であって連続週数ではない。
     # span_weeks=初回〜最新の暦週数 / present_ratio=weeks÷span_weeks
-    # contiguous=false の銘柄（eurjpy）は欠測が多い。連続系列として扱わないこと
+    # max_gap_days=隣接2週の最大間隔 / contiguous = max_gap_days<=10
+    # contiguous=false の銘柄（eurjpy: max_gap_days=434）は連続系列として扱わないこと
+  change_1w  # 直前の行が暦で1週前でなければ null（前週比として出さない）
+  weeks_52   # 直近52**週（暦）**の行。件数ではないので欠測銘柄では52件未満になる
   latest / prev / change_1w{all,long,short,net}
   weeks_52[]                      # 直近52週の行
   state{...}                      # §5-3
@@ -412,7 +416,8 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 
 **Claude Code移行後は git push が使えるため、この制約は解消された（2026-08-09 移行完了）。**
 ただし以下は維持すること:
-- コミット前に `python tests/test_parse.py` **全6ブロック合格**を確認
+- コミット前に `python tests/test_parse.py` **全10ブロック合格**を確認
+  （2026-08-09より両ワークフローの先頭でも自動実行されるようになった）
   （あわせて `python -m py_compile scripts/*.py tests/*.py`・§6-2の教訓）
 - パーサ・符号規則の変更時は `backfill-history` を再実行し coverage で検証
 - 公式データ形式に関する新しい発見は `docs/SPEC.md` に検証記録として追記
@@ -442,9 +447,14 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 | 2026-08-09 | **フルバックフィル実行（run 31322502500）→ 全33URL成功・CSV19本が byte-identical** |
 | 2026-08-09 | 失敗経路も実測（exit 1・0.0MB）。旧ルール「18秒より短ければ失敗」を**誤りとして撤回**（§6-3） |
 
-現在のテスト構成（`tests/test_parse.py`・**全6ブロック合格が正常**）:
+現在のテスト構成（`tests/test_parse.py`・**全10ブロック合格が正常**）:
 `main()`（Legacy符号規則）/ `test_tff()` / `test_state()` / `test_tff_legacy_bulk_format()` /
-`test_legacy_date_formats()` / `test_merge_preserves_history()`
+`test_legacy_date_formats()` / `test_merge_preserves_history()` /
+`test_symbols_and_dashboard_in_sync()` / `test_gappy_series_state()` /
+`test_weeks_52_and_change_1w_are_calendar_based()` / `test_min_samples_for_bias()`
+
+**2026-08-09より両ワークフローの先頭で自動実行される**（従来はローカル実行のみで、
+テストを追加しても実際には誰も回していない状態だった）。
 
 ### 2026-08-09 の変更が既存データに影響しないことの確認
 既存CSVから `cot-feed.json` を再生成して変更前と全文比較した結果、

@@ -53,6 +53,8 @@ def main():
     test_merge_preserves_history()
     test_symbols_and_dashboard_in_sync()
     test_gappy_series_state()
+    test_weeks_52_and_change_1w_are_calendar_based()
+    test_min_samples_for_bias()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -272,9 +274,13 @@ def test_symbols_and_dashboard_in_sync():
     with open(html_path, encoding="utf-8") as f:
         html = f.read()
 
-    m = re.search(r"const ORDER = \[(.*?)\];", html, re.S)
-    assert m, "index.html に ORDER 配列が見つからない"
-    order = re.findall(r'"([a-z0-9_]+)"', m.group(1))
+    # findall で「ちょうど1つ」を要求する。search だと最初の1件しか見ないため、
+    # コメントアウトされた古いコピーが上にあると、そちらを検査して素通りする。
+    matches = re.findall(r"const ORDER = \[(.*?)\];", html, re.S)
+    assert len(matches) == 1, (
+        "index.html の 'const ORDER = [...]' は1つだけであるべき（検出 %d 件）。"
+        "コメントアウトされた古い定義が残っていないか確認すること" % len(matches))
+    order = re.findall(r'"([a-z0-9_]+)"', matches[0])
 
     assert order == SLUG_ORDER, (
         "index.html の ORDER と symbols.py の SLUG_ORDER が不一致。\n"
@@ -298,9 +304,17 @@ def test_symbols_and_dashboard_in_sync():
         assert isinstance(s["sign_invert"], bool)
         assert isinstance(s["tff"], bool)
 
-    # 反転が要るのは日本円先物(097741)だけ。EUR/JPY(399741)は既にペア方向なので反転しない
+    # 反転が要るのは「先物の建て方がペア表記と逆」の銘柄だけ。
+    # 現状は日本円先物(097741)のみ（1円=何ドル建て）。
+    # EUR/JPY(399741)は1ユーロ=何円建てで既にペア方向なので反転しない。
     inverted = sorted(s["slug"] for s in SYMBOLS if s["sign_invert"])
-    assert inverted == ["usdjpy"], "sign_invert=True は usdjpy のみのはず: %s" % inverted
+    assert inverted == ["usdjpy"], (
+        "sign_invert=True の銘柄が変わった: %s\n"
+        "  これは自動的に誤りという意味ではない。銘柄を追加した場合は、その先物の\n"
+        "  **建て方**を確認すること: 建値がペア表記と逆（例: 円先物=1円あたりドル）なら\n"
+        "  True が正しい。ペア表記と同じ向き（例: ユーロ円=1ユーロあたり円）なら False。\n"
+        "  確認のうえ正しければ、この期待値と docs/HANDOFF.md §4 の表を更新すること。"
+        % inverted)
 
     print("SYMBOLS / DASHBOARD SYNC TESTS PASSED (%d symbols)" % len(SYMBOLS))
 
@@ -349,15 +363,98 @@ def test_gappy_series_state():
     s3, w3 = tff_alignment([50] * 10, lev)
     assert s3 == "divergence_warning" and w3 is not None
 
-    # --- coverage の在席率 ---
+    # --- 欠測1週を含む「実質5週」の窓を4週差分として出さない ---
+    five = ["2026-07-07", "2026-07-14", "2026-07-21", "2026-08-04", "2026-08-11"]
+    d, l = momentum_state([10, 20, 30, 40, 50], five)
+    assert d is None, "1週の欠測を含む窓(5週)を4週差分として出してはいけない: %s" % ((d, l),)
+
+    # --- coverage: 判定は在席率ではなく「最大の穴」で行う ---
     cov = coverage_block(cont)
     assert cov["weeks"] == 5 and cov["span_weeks"] == 5
     assert cov["contiguous"] is True and cov["present_ratio"] == 1.0, cov
+    assert cov["max_gap_days"] == 7, cov
+    # 1週の穴があれば contiguous=False（以前は span-1 を許容していて True になった）
+    hole = coverage_block(["2026-07-07", "2026-07-14", "2026-07-28", "2026-08-04"])
+    assert hole["contiguous"] is False, "1週の穴を連続扱いしてはいけない: %s" % hole
+    assert hole["max_gap_days"] == 14, hole
+    # 祝日ずれ(6日/8日)は連続扱いのまま
+    shifted = coverage_block(["2026-12-22", "2026-12-28", "2027-01-05"])
+    assert shifted["contiguous"] is True, shifted
     cov2 = coverage_block(["2020-01-07", "2026-08-04"])
     assert cov2["contiguous"] is False and cov2["present_ratio"] < 0.01, cov2
     assert coverage_block([])["weeks"] == 0
 
     print("GAPPY SERIES STATE TESTS PASSED")
+
+
+
+
+def test_weeks_52_and_change_1w_are_calendar_based():
+    """「52週推移」と「前週比」が件数ではなく暦で切られていること。
+
+    従来は dates[-52:]（直近52件）と rows[dates[-2]]（直前の行）だった。
+    eurjpy 実測では 52件=833日=119週、隣接行が7日でない割合17%・最大434日。
+    「52週」「前週比」というラベルのまま別物を出していた。
+    """
+    from cot_common import rows_last_52_weeks, change_vs_prev
+
+    def row(d, net):
+        return {"date": d, "all": 1, "long": net, "short": 0, "net": net}
+
+    # 連続60週 → 直近52週分だけ返る（従来と同じ挙動）
+    from datetime import datetime, timedelta
+    base = datetime(2026, 8, 4)
+    dates = [(base - timedelta(weeks=i)).strftime("%Y-%m-%d") for i in range(59, -1, -1)]
+    rows = {d: row(d, i) for i, d in enumerate(dates)}
+    got = rows_last_52_weeks(rows, dates)
+    assert len(got) == 52, len(got)
+    assert got[-1]["date"] == "2026-08-04"
+
+    # 欠測だらけの系列 → 件数ではなく暦で切るので52件未満になる
+    sparse = ["2019-01-01", "2020-01-07", "2021-01-05", "2026-07-28", "2026-08-04"]
+    srows = {d: row(d, 1) for d in sparse}
+    got2 = rows_last_52_weeks(srows, sparse)
+    assert [r["date"] for r in got2] == ["2026-07-28", "2026-08-04"], got2
+
+    # change_1w: 直前の行が暦で1週前なら出す
+    c = change_vs_prev(row("2026-08-04", 100), row("2026-07-28", 60),
+                       ("all", "long", "short", "net"))
+    assert c["net"] == 40, c
+
+    # 直前の行が遠ければ「前週比」として出さない
+    c2 = change_vs_prev(row("2026-08-04", 100), row("2025-08-26", 60),
+                        ("all", "long", "short", "net"))
+    assert c2 is None, "434日前との差を前週比として出してはいけない: %s" % c2
+    assert change_vs_prev(row("2026-08-04", 1), None, ("net",)) is None
+
+    print("WEEKS_52 / CHANGE_1W CALENDAR TESTS PASSED")
+
+
+
+
+def test_min_samples_for_bias():
+    """サンプルが少ないうちは偏り度を出さないこと（新規銘柄の誤表示防止）。
+
+    従来は2件でも percentile を返し、必ず p=100 or 50 になるため
+    classify_bias が「極端」を返してダッシュボードに赤バッジが出ていた。
+    """
+    from cot_common import percentile_of_last, classify_bias, legacy_state, STATE_THRESHOLDS
+
+    n = STATE_THRESHOLDS["min_samples_for_bias"]
+    assert percentile_of_last([5, 9]) is None, "2件で極端判定を出してはいけない"
+    assert classify_bias(percentile_of_last([5, 9])) is None
+    assert percentile_of_last(list(range(n - 1))) is None
+    assert percentile_of_last(list(range(n))) is not None
+
+    st = legacy_state([100, 200])
+    assert st["percentile_all"] is None and st["bias"] is None, st
+    assert st["side"] == "long", st          # 符号は少数サンプルでも出してよい
+
+    # 十分なサンプルがあれば従来どおり
+    assert percentile_of_last(list(range(1, 101))) == 100.0
+    assert classify_bias(percentile_of_last(list(range(1, 101)))) == "extreme"
+
+    print("MIN-SAMPLE BIAS TESTS PASSED")
 
 
 if __name__ == "__main__":

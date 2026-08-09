@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-08-10 01:43:27 JST",
+  "generated_at": "2026-08-10 01:50:56 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -27,6 +27,7 @@
    ],
    "momentum_weeks": 4,
    "levf_zerocross_weeks": 8,
+   "min_samples_for_bias": 26,
    "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
   },
   "notes": "backfill 2005-2026 from official annual zips",
@@ -44,6 +45,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -448,6 +450,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -755,6 +758,7 @@
     "weeks": 238,
     "span_weeks": 471,
     "present_ratio": 0.505,
+    "max_gap_days": 434,
     "contiguous": false
    },
    "latest": {
@@ -778,41 +782,6 @@
     "net": -286
    },
    "weeks_52": [
-    {
-     "date": "2024-04-23",
-     "all": 22355,
-     "long": 4865,
-     "short": -4288,
-     "net": 577
-    },
-    {
-     "date": "2024-04-30",
-     "all": 22074,
-     "long": 4685,
-     "short": -5256,
-     "net": -571
-    },
-    {
-     "date": "2024-06-04",
-     "all": 21959,
-     "long": 4581,
-     "short": -3989,
-     "net": 592
-    },
-    {
-     "date": "2024-06-11",
-     "all": 24865,
-     "long": 5426,
-     "short": -4266,
-     "net": 1160
-    },
-    {
-     "date": "2024-06-18",
-     "all": 28725,
-     "long": 6578,
-     "short": -4323,
-     "net": 2255
-    },
     {
      "date": "2025-08-26",
      "all": 16122,
@@ -1159,6 +1128,7 @@
      "weeks": 240,
      "span_weeks": 471,
      "present_ratio": 0.51,
+     "max_gap_days": 434,
      "contiguous": false
     },
     "latest": {
@@ -1186,31 +1156,6 @@
      "lev_net": -691
     },
     "weeks_52": [
-     {
-      "date": "2024-04-23",
-      "am_net": -7095,
-      "lev_net": 564
-     },
-     {
-      "date": "2024-04-30",
-      "am_net": -7179,
-      "lev_net": -391
-     },
-     {
-      "date": "2024-06-04",
-      "am_net": -6597,
-      "lev_net": 437
-     },
-     {
-      "date": "2024-06-11",
-      "am_net": -5578,
-      "lev_net": 793
-     },
-     {
-      "date": "2024-06-18",
-      "am_net": -6564,
-      "lev_net": 703
-     },
      {
       "date": "2025-08-26",
       "am_net": -7254,
@@ -1466,6 +1411,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -1870,6 +1816,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -2177,6 +2124,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -2581,6 +2529,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -2888,6 +2837,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -3292,6 +3242,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -3599,6 +3550,7 @@
     "weeks": 843,
     "span_weeks": 843,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -4003,6 +3955,7 @@
      "weeks": 843,
      "span_weeks": 843,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -4310,6 +4263,7 @@
     "weeks": 1110,
     "span_weeks": 1127,
     "present_ratio": 0.985,
+    "max_gap_days": 63,
     "contiguous": false
    },
    "latest": {
@@ -4714,6 +4668,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -5021,6 +4976,7 @@
     "weeks": 843,
     "span_weeks": 843,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -5425,6 +5381,7 @@
      "weeks": 843,
      "span_weeks": 843,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
@@ -5732,6 +5689,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -6140,6 +6098,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -6548,6 +6507,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -6956,6 +6916,7 @@
     "weeks": 1127,
     "span_weeks": 1127,
     "present_ratio": 1.0,
+    "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
@@ -7360,6 +7321,7 @@
      "weeks": 1052,
      "span_weeks": 1052,
      "present_ratio": 1.0,
+     "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
