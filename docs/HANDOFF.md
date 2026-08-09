@@ -1,8 +1,11 @@
 # CFTC-COT 引き継ぎ仕様書（Claude Code 移行用）
 
-作成日: 2026-07-27 / 対象リポジトリ: `MFlab-inc/CFTC-COT`（Public）
+作成日: 2026-07-27 / 最終更新: 2026-08-09 / 対象リポジトリ: `MFlab-inc/CFTC-COT`（Public）
 本書は Claude Code セッションでの作業再開に必要な全情報をまとめたもの。
 **本書に書かれていない仕様は「未確定」であり、推測で実装しないこと。**
+
+> **2026-08-09 更新**: Claude Code へ移行。収集精度に関わる不具合1件（§6-6）を修正し、
+> 「失敗が緑✅で通る」問題に機械判定を入れた（§7-3）。検証記録は `docs/SPEC.md` §10-11。
 
 ---
 
@@ -28,27 +31,30 @@ FX市況レポート（週次）およびスイング戦略の環境認識材料
 
 ---
 
-## 1. リポジトリ構成（全13ファイル・約1,650行）
+## 1. リポジトリ構成（約2,080行 / 2026-08-09時点）
 
 ```
 CFTC-COT/
 ├── .github/workflows/
-│   ├── weekly.yml          # 週次自動更新（cron 2本 + workflow_dispatch）
-│   └── backfill.yml        # 履歴再構築（workflow_dispatch のみ・start_year入力）
+│   ├── weekly.yml          # 週次自動更新（cron 2本 + workflow_dispatch）46行
+│   └── backfill.yml        # 履歴再構築（workflow_dispatch のみ）47行
 ├── scripts/
 │   ├── symbols.py          # 銘柄マスタ（145行）
-│   ├── cot_common.py       # 共通処理（463行）★中核
-│   ├── weekly_update.py    # 週次更新エントリポイント（91行）
-│   └── backfill.py         # 履歴バックフィル エントリポイント（130行）
+│   ├── cot_common.py       # 共通処理（469行）★中核
+│   ├── weekly_update.py    # 週次更新エントリポイント（173行）
+│   └── backfill.py         # 履歴バックフィル エントリポイント（225行）
 ├── tests/
-│   └── test_parse.py       # 検証テスト（160行・標準ライブラリのみ）
+│   └── test_parse.py       # 検証テスト（258行・標準ライブラリのみ）
 ├── data/
 │   ├── cot-feed.json       # ★統合フィード（自動生成・commit対象）
 │   └── csv/
 │       ├── {slug}.csv      # Legacy 11銘柄
 │       └── {slug}_tff.csv  # TFF 8銘柄
-├── index.html              # ダッシュボード（318行・単一ファイル・CSS/JS内包）
-├── docs/SPEC.md            # データ仕様書（183行）
+├── index.html              # ダッシュボード（321行・単一ファイル・CSS/JS内包）
+├── docs/
+│   ├── SPEC.md             # データ仕様書（312行）※検証記録はここに追記する
+│   └── HANDOFF.md          # 本書
+├── .gitignore              # __pycache__ 等の生成物を除外
 └── README.md               # セットアップ手順（85行）
 ```
 
@@ -123,10 +129,18 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
 | copper | 銅 | 085692 | False | × | Legacy 1,125週 |
 | us10y | 米10年債 | 043602 | False | ○ | Legacy 1,125週 / TFF 1,050週 |
 
+※ 上表の週数は 2026-07-27 時点。週次更新で毎週1週ずつ増える
+（2026-08-04 週時点で Legacy 1,127 / TFF 1,052 / sp500・nydow 843 / nikkei225 Legacy 1,110）。
+
 **欠測はすべて仕様であり不具合ではない**:
 - `sp500` / `nydow`: Consolidatedコード（13874+ / 12460+）の集計開始が2010-06-15のため
-- `nikkei225` Legacy 1,108週（他より17週少ない）: CFTC公式ルール「報告対象トレーダーが
-  20者未満の週はレポートから除外」による。日経先物（CME）は参加者が少なく時折閾値を割る
+- `nikkei225` Legacy が他より17週少ない件: CFTC公式ルール「報告対象トレーダーが
+  20者未満の週はレポートから除外」と矛盾しない。
+  **2026-08-09の実測（SPEC §10-2）**: 欠測17週は**すべて 2005-01-11〜2005-07-26 に集中**し、
+  **2005-08-02以降は現在まで欠測ゼロ**。2006-06-13以降は Legacy と TFF の日付集合が完全一致
+  （1,052 = 1,052・差分0件）。旧記述の「時折閾値を割る」は誤解を招くため訂正した
+  （散発的に起きるのではなく、2005年前半に限られた現象）。
+  ※ 除外理由そのものはCFTC公式で未確認
 - `wti` / `gold` / `copper`: TFFは金融先物のみが対象のため構造的に存在しない（JSONで `tff: null`）
 
 ---
@@ -219,10 +233,16 @@ levf_zerocross_weeks = 8        # LevF直近ゼロクロス判定の遡り週数
 ワークフローは緑✅のまま**になり発見が遅れる。編集後は必ず
 `python -m py_compile scripts/*.py` と実行ログの `WARN` 行を確認すること。
 
-### 6-3. 失敗が緑✅で通る設計
-バックフィルは1URLの失敗をスキップして継続する。
+### 6-3. 失敗が緑✅で通る設計 → **2026-08-09に機械判定を追加（§7-3）**
+（従来）バックフィルは1URLの失敗をスキップして継続する。
 **実行時間が異常に短い（例: 全年で18秒）場合は取得失敗を疑う**こと。
 判定はログ末尾の `=== coverage ===` / `=== tff coverage ===` の週数で行う。
+
+（現在）上記の目視判定は残しつつ、**取得失敗・マッチ0件・週数減少があれば
+ワークフローが赤くなる**ようにした。ログ末尾に `=== health ===` が出て
+`RESULT: OK` / `DEGRADED` / `FAILED` を明示する。実行時間とダウンロード量も
+health ブロックに出るため、「18秒で終わった」は数値で確認できる。
+**ただし health を過信せず、coverage の週数は引き続き必ず目視すること。**
 
 ### 6-4. GitHub Web UIでは `.github/` がアップロードできない
 ブラウザのフォルダドラッグはドット始まりディレクトリを除外する。
@@ -232,6 +252,38 @@ Claude Code なら通常の git push で解決する（**移行後はこの制�
 ### 6-5. Consolidatedコードの `+` 記号
 `13874+` / `12460+` はコード文字列にプラス記号を含む。文字列比較で扱っており
 数値変換してはいけない。
+
+### 6-6. ★backfill の `start_year` がTFF履歴を消していた（2026-08-09 修正済み）
+`backfill.py` にTFF側だけ「`start_year` より前の行を捨てる」処理があり、
+**`backfill-history` の start_year に2005以外を入れるとTFF履歴が消える**状態だった。
+Legacy側には同じ処理が無く非対称。しかもワークフローは差分を自動commit&pushするため
+消失がリポジトリに確定し、run は緑✅で終わる（§6-3 と同じ形の事故）。
+
+実測: start_year=2017 で TFF 1,052→501週（−551）、2020 で −708週、2026 で **−1,021週**。
+Legacy は 1,127週のまま。ワークフロー入力の説明が「1986年まで遡及可能」なので、
+別の年を入れる動機は実際にある。
+
+→ 修正: フィルタを削除し、TFFもLegacyと同じ「**既存行は常に保持・同じ日付のみ上書き**」に統一。
+`start_year`/`end_year` は「どの年のZIPを取りに行くか」だけを決める。
+加えて**書き込み前に週数の減少を検査し、減る場合はCSVを一切書かずに異常終了**する。
+`tests/test_parse.py::test_merge_preserves_history` で固定化済み。
+
+### 6-7. Claude Code の実行環境から cftc.gov / github.io に出られない
+組織のegressポリシーにより、Claude Codeセッションからは `www.cftc.gov` も
+`mflab-inc.github.io` も **HTTP 403** で遮断される（2026-08-09確認）。
+**迂回は禁止**（プロキシのREADMEに明記）。
+
+実務上の影響は小さい: **GitHub Actions のランナーはこの制限を受けない**。
+したがって公式データでの裏取りは以下で行う。
+
+| やりたいこと | 方法 |
+|---|---|
+| 公式データでパーサを検証 | Actions の `backfill-history` を実行し `=== health ===` と coverage を読む |
+| 最新週の取得を確認 | Actions の `weekly-cot-update` を手動実行しログを読む |
+| 公開ページの表示確認 | しょうさんのブラウザで開く |
+
+ローカル（セッション内）でできるのは `python tests/test_parse.py` と、
+保存済みCSVからの `cot-feed.json` 再生成までに限られる。
 
 ---
 
@@ -249,10 +301,27 @@ Legacy → TFF の順に取得し、変更があった場合のみ `data/` をco
 TFF取得が失敗してもLegacy側は影響を受けない（try/exceptで分離済み）。
 
 ### backfill.yml
-`workflow_dispatch` のみ。入力 `start_year`（既定 2005）。
+`workflow_dispatch` のみ。入力 `start_year`（既定 2005）と `allow_partial`（既定 false）。
 Legacy年次ZIP → TFF統合ZIP → TFF年次ZIP の順に取得し全CSVを再構築、
-末尾に `=== coverage ===` と `=== tff coverage ===` を出力する。
+末尾に `=== coverage ===` `=== tff coverage ===` `=== health ===` を出力する。
 **新銘柄追加・パーサ修正後は必ずこれを再実行する。**
+
+`start_year` は「どの年のZIPを取りに行くか」だけを決める（既存データは削られない・§6-6）。
+TFF統合ZIP(2006-2016)は期間が掛かるときだけ取得する。
+`allow_partial` は**公式から恒久的に削除された年がある場合にだけ** true にする。
+
+### 7-3. 失敗検知（2026-08-09追加）
+**backfill**: 取得失敗／マッチ0件／Legacy 0週／週数減少 のいずれかで **exit 1**。
+python が異常終了するとワークフローの commit ステップが飛ぶため、
+**取得漏れのあるデータはリポジトリに入らない**。週数減少時はCSVを一切書かない。
+
+**weekly**: Legacy取得の失敗はその場で失敗させる。TFF失敗・鮮度異常は
+**exit 0 のまま**にして（ここで落とすと取れたLegacyの最新週まで捨ててしまう）、
+`GITHUB_OUTPUT` に `degraded=1` を出し、**commitを済ませた後の別ステップで** run を赤くする。
+鮮度判定は「その週に居たか」ではなく「保存済みデータが14日以上古びていないか」で行う
+（20者未満ルールによる1週の欠席でオオカミ少年にならないため・§3）。
+
+詳細な条件表は `docs/SPEC.md` §11。
 
 ### リトライ
 `http_get(url, timeout=180, retries=3, backoff=5)` に指数バックオフ実装済み。
@@ -305,12 +374,17 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 これまでは「Claudeが全実装・検証 → しょうさんがGitHub Web UIで手動アップロード」
 という分担だったため、**変更のたびにZIP納品＋手動アップロードが発生**していた。
 
-**Claude Code移行後は git push が使えるため、この制約は解消される。**
+**Claude Code移行後は git push が使えるため、この制約は解消された（2026-08-09 移行完了）。**
 ただし以下は維持すること:
-- コミット前に `python tests/test_parse.py` 全件合格を確認
+- コミット前に `python tests/test_parse.py` **全6ブロック合格**を確認
+  （あわせて `python -m py_compile scripts/*.py tests/*.py`・§6-2の教訓）
 - パーサ・符号規則の変更時は `backfill-history` を再実行し coverage で検証
 - 公式データ形式に関する新しい発見は `docs/SPEC.md` に検証記録として追記
 - **数値・URL・仕様は必ず公式で裏取りし、推測で埋めない**
+  — ただしClaude Codeセッションから cftc.gov には出られない（§6-7）。
+    裏取りは Actions 経由で行い、できなかった項目は「未確認」と明記する
+- **出力パス・ファイル名・`schema_version` は変更しない**（レポート生成が参照しているため。
+  変更が必要な場合は必ず事前に相談する）
 
 ---
 
@@ -323,6 +397,19 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 | 2026-07-27 | v1.2: Legacy/TFFタブ分離・読み方ガイド・状態表示3層を実装 |
 | 2026-07-27 | TFF統合ZIPの日付形式問題を特定・修正（§6-1） |
 | 2026-07-27 | `import io` 欠落を修正（§6-2）→ **TFF全期間取得成功・最終検収完了** |
+| 2026-08-09 | Claude Code へ移行。`.gitignore` 追加（`__pycache__` の混入防止） |
+| 2026-08-09 | **backfill の start_year がTFF履歴を削る不具合を修正（§6-6）**＋週数減少ガード追加 |
+| 2026-08-09 | 失敗検知を機械判定化（§7-3）。backfillは exit 1、weeklyは commit後に run を赤く |
+| 2026-08-09 | Legacyパーサも `_normalize_date()` に統一（§6-1 の再発防止）。出力不変を確認 |
+| 2026-08-09 | nikkei225 の欠測17週が2005年前半に集中している事実を実測・§3を訂正 |
+| 2026-08-09 | `docs/SPEC.md` 冒頭の混入行を削除、検証記録 §10・§11 を追記 |
 
-現在のテスト構成（`tests/test_parse.py`・全件合格が正常）:
-`main()`（Legacy符号規則）/ `test_tff()` / `test_state()` / `test_tff_legacy_bulk_format()`
+現在のテスト構成（`tests/test_parse.py`・**全6ブロック合格が正常**）:
+`main()`（Legacy符号規則）/ `test_tff()` / `test_state()` / `test_tff_legacy_bulk_format()` /
+`test_legacy_date_formats()` / `test_merge_preserves_history()`
+
+### 2026-08-09 の変更が既存データに影響しないことの確認
+既存CSVから `cot-feed.json` を再生成して変更前と全文比較した結果、
+**差分は `meta.generated_at` の1行のみ**。11銘柄すべての値・coverage・state が完全一致。
+出力パス・ファイル名・`schema_version`（1.2）はいずれも変更していないため、
+**公開URLとレポート側の参照はそのまま使える**（SPEC §10-3 / §10-5）。

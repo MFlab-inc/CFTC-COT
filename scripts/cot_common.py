@@ -106,8 +106,14 @@ def parse_legacy_lines(text, wanted_codes):
     """Legacy Futures-Only テキストをパースし、対象コードの行だけ返す。
 
     戻り値: list of dict {code, date, oi, nc_long, nc_short, market_name}
-    ヘッダ行（annual ファイルに存在し得る）は date 欄が ISO 形式でないため
+    ヘッダ行（annual ファイルに存在し得る）は date 欄が日付として解釈できないため
     自動スキップされる。
+
+    日付は TFF 側と同じ _normalize_date() を通す。現行のLegacyファイルは週次・
+    年次ZIPともISO日付だが、TFF統合ZIPで実際に起きた「ヘッダのラベルはISOなのに
+    実データはMM/DD/YYYY」という不一致（§6-1）がLegacy側で発生した場合、
+    ISO決め打ちだと全行スキップ＝0件になり、しかも例外が出ないため
+    ワークフローは緑のまま通ってしまう。両形式を受けることで同種の再発を防ぐ。
     """
     out = []
     reader = csv.reader(io.StringIO(text))
@@ -117,9 +123,9 @@ def parse_legacy_lines(text, wanted_codes):
         code = fields[3].strip().strip('"')
         if code not in wanted_codes:
             continue
-        date_iso = fields[2].strip().strip('"')
-        if len(date_iso) != 10 or date_iso[4] != "-" or date_iso[7] != "-":
-            continue  # ヘッダ行など
+        date_iso = _normalize_date(fields[2])
+        if date_iso is None:
+            continue  # ヘッダ行、または未知の日付形式
         try:
             oi = _to_int(fields[7])
             nc_long = _to_int(fields[8])
