@@ -1,5 +1,9 @@
 name: weekly-cot-update
 
+# 一時的に調査専用の内容に差し替え中（EUR/JPY等クロス円コード探索）。
+# main側のこのファイルは無傷（cronはmainの内容を使うため影響なし）。
+# 調査完了後、直ちに元の内容に戻す。
+
 on:
   schedule:
     - cron: "30 0 * * 6"
@@ -7,7 +11,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update:
@@ -17,32 +21,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Fetch latest COT and update feed
-        id: update
-        run: python scripts/weekly_update.py
-        env:
-          PYTHONPATH: ${{ github.workspace }}/scripts
-      - name: Commit and push if changed
-        run: |
-          git config user.name "cot-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add data/
-          if git diff --cached --quiet; then
-            echo "No data changes."
-          else
-            git commit -m "weekly COT update ($(date -u +%Y-%m-%d))"
-            git push
-          fi
-      # Legacyが取れていればデータは必ずcommitする。そのうえで、TFF取得失敗や
-      # 鮮度異常があった週は run を赤くして気づけるようにする（§6-2 / §6-3 対策）。
-      # このステップを commit の後ろに置くのが重要: 前に置くと、取れたLegacyの
-      # 最新週まで捨ててしまう。
-      - name: Fail the run if the feed is degraded
-        if: steps.update.outputs.degraded == '1'
-        run: |
-          echo "::error title=COT feed degraded::$REASON"
-          echo "データは commit 済みですが、一部が取得できていません。"
-          echo "上の 'Fetch latest COT and update feed' ステップの === health === を確認してください。"
-          exit 1
-        env:
-          REASON: ${{ steps.update.outputs.degraded_reason }}
+      - name: DIAG - search official CFTC weekly files for cross-rate contracts
+        run: python scripts/_diag_symbol_search.py
