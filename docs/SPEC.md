@@ -485,3 +485,58 @@ USD/JPY のように「公式値と完全一致」を確認した銘柄とは検
 **2026-08-04 週の出力**（照合用）:
 - Legacy: `all=20895, long=6183, short=-3883, net=+2300`（非商業は小幅ネットロング）
 - TFF: `am_net=-3363`（AMはネットショート）, `lev_net=+578`（LevFはネットロング）
+
+
+---
+
+## 13. 契約名の照合（2026-08-09追加）
+
+### 13-1. 背景
+
+`symbols.py` は各銘柄に `market_hint`（この契約はこういう名前のはず）を持っていたが、
+**どこからも参照されていなかった**。そのため CFTC がコードを別契約に振り替えても
+検知できず、「銘柄ラベルは正しいまま中身だけ別商品になる」という気づきにくい
+壊れ方をし得た。
+
+`backfill.py` が公式ファイル上の契約名を収集し、`=== contract names (official) ===`
+として必ずログに出力するようにした。`market_hint` と一致しない場合は health に
+WARN を出す（表記ゆれで誤検知し得るため run は落とさない）。
+
+### 13-2. 全12銘柄の公式契約名（run 31325767237 で取得）
+
+| slug | code | 公式ファイル上の契約名 |
+|---|---|---|
+| usdjpy | 097741 | JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE |
+| eurjpy | 399741 | EURO FX/JAPANESE YEN XRATE - CHICAGO MERCANTILE EXCHANGE |
+| gbpusd | 096742 | BRITISH POUND - CHICAGO MERCANTILE EXCHANGE |
+| eurusd | 099741 | EURO FX - CHICAGO MERCANTILE EXCHANGE |
+| audusd | 232741 | AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE |
+| sp500 | 13874+ | S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE |
+| nikkei225 | 240743 | NIKKEI STOCK AVERAGE YEN DENOM - CHICAGO MERCANTILE EXCHANGE |
+| nydow | 12460+ | DJIA Consolidated - **CHICAGO BOARD OF TRADE** |
+| wti | 067651 | **WTI-PHYSICAL** - NEW YORK MERCANTILE EXCHANGE |
+| gold | 088691 | GOLD - COMMODITY EXCHANGE INC. |
+| copper | 085692 | COPPER- #1 - COMMODITY EXCHANGE INC. |
+| us10y | 043602 | UST 10Y NOTE - CHICAGO BOARD OF TRADE |
+
+### 13-3. WTI の名称不一致（調査済み・データは正しい）
+
+初回実行で `wti` のみ WARN が出た（hint=`CRUDE OIL` / 実際=`WTI-PHYSICAL`）。
+
+**調査結果: コードの振り替えではなく、CFTC側の表示名変更**。以下の根拠で
+067651 が主要WTI原油先物であることを確認した。
+
+| 締め日 | Open Interest |
+|---|---|
+| 2005-01-04 | 683,120 |
+| 2010-01-05 | 1,231,436 |
+| 2015-01-06 | 1,505,101 |
+| 2020-01-07 | 2,244,930 |
+| 2026-08-04 | 1,886,816 |
+
+建玉188万枚規模かつ2005年から1,127週連続（最大間隔8日＝祝日ずれのみ）であり、
+ニッチな契約ではあり得ない。`market_hint` を実際の名称 `WTI-PHYSICAL` に更新した。
+
+※ 旧称 "CRUDE OIL, LIGHT SWEET" から現行表記への変更時期は未調査（未確認）。
+レポートで銘柄名を書く際は「WTI原油」表記のままで問題ないが、公式ファイルを
+直接参照する場合は現行名が `WTI-PHYSICAL` である点に注意。

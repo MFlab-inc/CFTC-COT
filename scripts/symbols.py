@@ -119,10 +119,12 @@ SYMBOLS = [
         "tff": False,
         "label": "WTI原油",
         "code": "067651",
-        "market_hint": "CRUDE OIL",
+        # 公式ファイル上の名称は "WTI-PHYSICAL"（旧称 CRUDE OIL, LIGHT SWEET）。
+        # 2026-08-09の照合で判明。建玉188万枚＝主要WTI契約であることを確認済み（SPEC §12-5）
+        "market_hint": "WTI-PHYSICAL",
         "sign_invert": False,
         "fallback_codes": [],
-        "note": "NYMEX WTI（Light Sweet Crude Oil）",
+        "note": "NYMEX WTI原油先物。公式表記は WTI-PHYSICAL（旧 Light Sweet Crude Oil）",
     },
     {
         "slug": "gold",
