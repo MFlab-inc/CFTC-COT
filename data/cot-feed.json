@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-08-10 01:34:32 JST",
+  "generated_at": "2026-08-10 01:43:27 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -41,7 +41,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -442,7 +445,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -742,11 +748,14 @@
    "label": "EUR/JPY",
    "cftc_code": "399741",
    "sign_convention": "raw",
-   "note": "CMEユーロ円クロスレート先物（1ユーロ=何円建て）。合成値ではなくCFTC公式の単独銘柄。建玉が小さく報告者20者未満で欠測する週がある",
+   "note": "CMEユーロ円クロスレート先物（1ユーロ=何円建て）。合成値ではなくCFTC公式の単独銘柄。建玉が小さく報告者20者未満の週は除外されるため欠測が多い（在席率約51%・最長61週連続欠測。coverage.present_ratio 参照）",
    "coverage": {
     "first_date": "2017-08-01",
     "last_date": "2026-08-04",
-    "weeks": 238
+    "weeks": 238,
+    "span_weeks": 471,
+    "present_ratio": 0.505,
+    "contiguous": false
    },
    "latest": {
     "date": "2026-08-04",
@@ -1147,7 +1156,10 @@
     "coverage": {
      "first_date": "2017-08-01",
      "last_date": "2026-08-04",
-     "weeks": 240
+     "weeks": 240,
+     "span_weeks": 471,
+     "present_ratio": 0.51,
+     "contiguous": false
     },
     "latest": {
      "date": "2026-08-04",
@@ -1451,7 +1463,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -1852,7 +1867,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -2156,7 +2174,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -2557,7 +2578,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -2861,7 +2885,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -3262,7 +3289,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -3566,7 +3596,10 @@
    "coverage": {
     "first_date": "2010-06-15",
     "last_date": "2026-08-04",
-    "weeks": 843
+    "weeks": 843,
+    "span_weeks": 843,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -3967,7 +4000,10 @@
     "coverage": {
      "first_date": "2010-06-15",
      "last_date": "2026-08-04",
-     "weeks": 843
+     "weeks": 843,
+     "span_weeks": 843,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -4271,7 +4307,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1110
+    "weeks": 1110,
+    "span_weeks": 1127,
+    "present_ratio": 0.985,
+    "contiguous": false
    },
    "latest": {
     "date": "2026-08-04",
@@ -4672,7 +4711,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -4976,7 +5018,10 @@
    "coverage": {
     "first_date": "2010-06-15",
     "last_date": "2026-08-04",
-    "weeks": 843
+    "weeks": 843,
+    "span_weeks": 843,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -5377,7 +5422,10 @@
     "coverage": {
      "first_date": "2010-06-15",
      "last_date": "2026-08-04",
-     "weeks": 843
+     "weeks": 843,
+     "span_weeks": 843,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -5681,7 +5729,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -6086,7 +6137,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -6491,7 +6545,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -6896,7 +6953,10 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -7297,7 +7357,10 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",

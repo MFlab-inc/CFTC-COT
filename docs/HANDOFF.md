@@ -11,7 +11,7 @@
 
 ## 0. プロジェクト概要
 
-CFTC公式のCOT（Commitments of Traders）レポートから対象11銘柄の建玉を
+CFTC公式のCOT（Commitments of Traders）レポートから対象12銘柄の建玉を
 毎週自動取得し、GitHub Pages上で機械可読フィードとして公開するシステム。
 **稼働中・全機能検収済み（2026-07-27時点）**。
 
@@ -48,8 +48,8 @@ CFTC-COT/
 ├── data/
 │   ├── cot-feed.json       # ★統合フィード（自動生成・commit対象）
 │   └── csv/
-│       ├── {slug}.csv      # Legacy 11銘柄
-│       └── {slug}_tff.csv  # TFF 8銘柄
+│       ├── {slug}.csv      # Legacy 12銘柄
+│       └── {slug}_tff.csv  # TFF 9銘柄
 ├── index.html              # ダッシュボード（321行・単一ファイル・CSS/JS内包）
 ├── docs/
 │   ├── SPEC.md             # データ仕様書（312行）※検証記録はここに追記する
@@ -118,6 +118,7 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
 | slug | 銘柄 | CFTCコード | sign_invert | tff | 取得実績（検収済み） |
 |---|---|---|---|---|---|
 | usdjpy | USD/JPY | 097741 | **True** | ○ | Legacy 2005-01-04〜1,125週 / TFF 2006-06-13〜1,050週 |
+| eurjpy | EUR/JPY | 399741 | False | ○ | **2026-08-09追加**。Legacy 2017-08-01〜238週 / TFF 240週（下記注） |
 | gbpusd | GBP/USD | 096742 | False | ○ | 同上 |
 | eurusd | EUR/USD | 099741 | False | ○ | 同上 |
 | audusd | AUD/USD | 232741 | False | ○ | 同上 |
@@ -142,6 +143,11 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
   （散発的に起きるのではなく、2005年前半に限られた現象）。
   ※ 除外理由そのものはCFTC公式で未確認
 - `wti` / `gold` / `copper`: TFFは金融先物のみが対象のため構造的に存在しない（JSONで `tff: null`）
+- **`eurjpy` は欠測が非常に多い（在席率約51%）**。2017-08-01〜2026-08-04 の471週のうち
+  Legacy 238週・TFF 240週しか存在せず、**最長61週の連続欠測**がある（SPEC §12-2）。
+  建玉がUSD/JPYの約5%（OI 約2万枚 vs 約42万枚）と薄く、報告者20者未満で除外されるため。
+  直近1年は53週中47週あり改善しているが、**連続系列として扱ってはいけない**。
+  JSONの `coverage.present_ratio` / `coverage.contiguous` で機械的に判定できる
 
 ---
 
@@ -150,9 +156,22 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
 | slug | sign_convention | 規則 |
 |---|---|---|
 | usdjpy | `usdjpy_direction(inverted)` | `long` = 円先物の非商業**ショート**（＝USD/JPY買い方向）<br>`short` = −（円先物の非商業ロング）<br>**net プラス＝投機筋の円ショート優勢** |
-| 上記以外 | `raw` | `long` = 非商業ロング、`short` = −非商業ショート |
+| 上記以外（eurjpy含む） | `raw` | `long` = 非商業ロング、`short` = −非商業ショート |
 
 TFF側（`am_*` / `lev_*`）も**同一の符号規則**を適用する（`to_tff_row(rec, sign_invert)`）。
+
+### ★ USD/JPY と EUR/JPY で扱いが違う理由（混同注意）
+どちらも「円が絡むペア」だが、**先物の建て方が逆**なので反転の要否が異なる。
+
+| 先物 | 建て方 | ロングの意味 | sign_invert |
+|---|---|---|---|
+| 日本円先物 097741 | 1円 = 何ドル | 円買い ＝ **USD/JPY下落**方向 | **True**（反転が必要） |
+| ユーロ円クロス 399741 | 1ユーロ = 何円 | ユーロ買い円売り ＝ **EUR/JPY上昇**方向 | **False**（既にペア方向） |
+
+つまり `eurjpy` は **net プラス＝投機筋のユーロロング／円ショート優勢**で、
+ペア表記とそのまま同じ向きになる。ここを反転させると符号が逆になるので触らないこと。
+`tests/test_parse.py::test_symbols_and_dashboard_in_sync` が
+「sign_invert=True は usdjpy のみ」を機械的に固定している。
 
 **検証記録（変更時の回帰基準・tests に固定化済み）**:
 - CFTC公式 2026-07-21付 JAPANESE YEN Code-097741
@@ -178,7 +197,10 @@ meta:
   source{weekly, historical, note} / schema{各列の説明} / state_thresholds / notes
 symbols.{slug}:
   label / cftc_code / sign_convention / note
-  coverage{first_date, last_date, weeks}
+  coverage{first_date, last_date, weeks, span_weeks, present_ratio, contiguous}
+    # weeks は「保存されている行数」であって連続週数ではない。
+    # span_weeks=初回〜最新の暦週数 / present_ratio=weeks÷span_weeks
+    # contiguous=false の銘柄（eurjpy）は欠測が多い。連続系列として扱わないこと
   latest / prev / change_1w{all,long,short,net}
   weeks_52[]                      # 直近52週の行
   state{...}                      # §5-3
@@ -202,13 +224,13 @@ levf_zerocross_weeks = 8        # LevF直近ゼロクロス判定の遡り週数
 | percentile_all | 現在netの**全履歴**パーセンタイル（当該値以下の割合×100） |
 | bias | extreme / biased / neutral（境界は外側に割当て＝保守側） |
 | side | long / short / flat |
-| momentum_4w / momentum_label | net の4週差分と方向ラベル（積み増し/縮小/横ばい） |
+| momentum_4w / momentum_label | net の4週差分と方向ラベル（積み増し/縮小/横ばい）。<br>**欠測をまたぐ場合は null**（「4件前」が暦で4週前でないときは数値を出さない） |
 
 **TFF `tff.state`**（`tff_alignment()`）
 | キー | 定義 |
 |---|---|
 | alignment | `aligned`（AM・LevF符号一致＝持続性高）/ `divergence_warning`（不一致かつLevFが直近8週内にゼロクロス＝転換警戒）/ `mixed`（不一致・直近クロスなし） |
-| levf_zerocross_weeks_ago | LevF直近ゼロクロスが何週前か（8週超は null） |
+| levf_zerocross_weeks_ago | LevF直近ゼロクロスが何週前か（8週超は null）。<br>**暦の週数**で数える。クロスを挟む2点が2週以上離れていて反転時期を特定できない場合は null（＝`mixed` 扱い） |
 | lev_percentile_all / lev_bias | LevF net の全履歴パーセンタイルと偏り度 |
 
 ---

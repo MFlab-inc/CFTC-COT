@@ -144,23 +144,30 @@ def main():
     if missing_tff:
         print("  tff absent     : %s（同上）" % missing_tff)
 
+    # 銘柄ごとに許容日数を変えられる。CFTCが報告者20者未満の週を除外するため、
+    # 建玉の薄い銘柄は長期欠測が正常挙動になる（eurjpy: 在席率51%・最長61週）。
+    # 一律14日で判定すると、そういう銘柄を持った瞬間に毎週赤くなってしまう。
     stale_syms = []
     for s in SYMBOLS:
+        limit = s.get("max_stale_days", STALE_AFTER_DAYS)
         ds = sorted(read_symbol_csv(s["slug"]))
         d = _stale(ds[-1] if ds else None)
-        if d is None or d > STALE_AFTER_DAYS:
-            stale_syms.append("%s(legacy:%s)" % (s["slug"], ds[-1] if ds else "NO DATA"))
+        if d is None or d > limit:
+            stale_syms.append("%s(legacy:%s/%d日超)" % (s["slug"], ds[-1] if ds else "NO DATA", limit))
     tff_dates = []
     for s in tff_syms:
+        limit = s.get("max_stale_days", STALE_AFTER_DAYS)
         ds = sorted(read_tff_csv(s["slug"]))
         tff_dates.append(ds[-1] if ds else None)
         d = _stale(ds[-1] if ds else None)
-        if d is None or d > STALE_AFTER_DAYS:
-            stale_syms.append("%s(tff:%s)" % (s["slug"], ds[-1] if ds else "NO DATA"))
+        if d is None or d > limit:
+            stale_syms.append("%s(tff:%s/%d日超)" % (s["slug"], ds[-1] if ds else "NO DATA", limit))
     print("  tff as-of      : %s" % sorted(set(v for v in tff_dates if v)))
+    thin = [s["slug"] for s in SYMBOLS if s.get("max_stale_days")]
+    if thin:
+        print("  thin symbols   : %s（長期欠測が正常。許容日数を個別設定）" % thin)
     if stale_syms:
-        problems.append("%d日以上更新されていない系列: %s"
-                        % (STALE_AFTER_DAYS, ", ".join(stale_syms)))
+        problems.append("許容日数を超えて更新されていない系列: %s" % ", ".join(stale_syms))
 
     print("  RESULT: %s" % ("DEGRADED" if problems else "OK"))
     for p in problems:

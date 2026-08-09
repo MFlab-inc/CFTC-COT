@@ -52,6 +52,7 @@ def main():
     test_legacy_date_formats()
     test_merge_preserves_history()
     test_symbols_and_dashboard_in_sync()
+    test_gappy_series_state()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -302,6 +303,61 @@ def test_symbols_and_dashboard_in_sync():
     assert inverted == ["usdjpy"], "sign_invert=True は usdjpy のみのはず: %s" % inverted
 
     print("SYMBOLS / DASHBOARD SYNC TESTS PASSED (%d symbols)" % len(SYMBOLS))
+
+
+
+
+def test_gappy_series_state():
+    """欠測のある系列（eurjpy等）で「○週」表示が暦とずれないこと。
+
+    CFTCは報告者20者未満の週を除外するため、eurjpy は実測で在席率51%・
+    最長61週の連続欠測がある。件数で数えると「4件前」が暦では20週前という
+    ことが起こり、momentum_4w が「4週差分」として誤った数値になる。
+    """
+    from cot_common import momentum_state, tff_alignment, coverage_block
+
+    # --- 連続した5週: 従来どおり4週差分が出る ---
+    cont = ["2026-07-07", "2026-07-14", "2026-07-21", "2026-07-28", "2026-08-04"]
+    d, l = momentum_state([10, 20, 30, 40, 50], cont)
+    assert d == 40 and l == "ロング積み増し", (d, l)
+
+    # --- 同じ5件だが間に大穴: 4週差分としては出さない ---
+    gappy = ["2025-01-07", "2025-06-03", "2026-07-21", "2026-07-28", "2026-08-04"]
+    d, l = momentum_state([10, 20, 30, 40, 50], gappy)
+    assert d is None and l is None, "欠測をまたいだ差分を4週として出してはいけない: %s" % ((d, l),)
+
+    # --- dates を渡さなければ従来動作（後方互換）---
+    d, l = momentum_state([10, 20, 30, 40, 50, 60])
+    assert d == 40 and l == "ロング積み増し"
+
+    # --- ゼロクロスの「○週前」も暦で数える ---
+    lev = [5, 4, 3, 2, 1, -1, -2, -3, -4, -5]
+    cont10 = ["2026-06-02", "2026-06-09", "2026-06-16", "2026-06-23", "2026-06-30",
+              "2026-07-07", "2026-07-14", "2026-07-21", "2026-07-28", "2026-08-04"]
+    s, w = tff_alignment([50] * 10, lev, cont10)
+    assert s == "divergence_warning" and w == 4, (s, w)   # 5番目→6番目で反転＝4週前
+
+    # クロスを挟む2点の間に大穴がある場合、いつ反転したか特定できないので
+    # 「○週前」と断定しない（下は反転が2019年〜2026年のどこかでしか分からない例）
+    far = ["2019-01-01", "2019-02-01", "2019-03-01", "2019-04-01", "2019-05-01",
+           "2026-07-07", "2026-07-14", "2026-07-21", "2026-07-28", "2026-08-04"]
+    s2, w2 = tff_alignment([50] * 10, lev, far)
+    assert w2 is None, "欠測に挟まれたクロスを『4週前』と断定してはいけない: %s" % ((s2, w2),)
+    assert s2 == "mixed", "時期が特定できないなら転換警戒ではなく不一致扱い: %s" % s2
+
+    # dates なしなら従来動作（件数ベース）
+    s3, w3 = tff_alignment([50] * 10, lev)
+    assert s3 == "divergence_warning" and w3 is not None
+
+    # --- coverage の在席率 ---
+    cov = coverage_block(cont)
+    assert cov["weeks"] == 5 and cov["span_weeks"] == 5
+    assert cov["contiguous"] is True and cov["present_ratio"] == 1.0, cov
+    cov2 = coverage_block(["2020-01-07", "2026-08-04"])
+    assert cov2["contiguous"] is False and cov2["present_ratio"] < 0.01, cov2
+    assert coverage_block([])["weeks"] == 0
+
+    print("GAPPY SERIES STATE TESTS PASSED")
 
 
 if __name__ == "__main__":
