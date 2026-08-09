@@ -7,6 +7,11 @@ on:
         description: "開始年（公式年次ZIPは1986年まで遡及可能）"
         required: true
         default: "2005"
+      allow_partial:
+        description: "一部の年のZIPが取得できなくても成功扱いにする（公式から恒久的に消えた年がある場合のみ true）"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -19,10 +24,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # スクリプトが異常終了した場合は、この次の commit ステップが実行されない。
+      # 取得漏れのある中途半端なデータがリポジトリに入らないための設計。
+      # 判定はログ末尾の === coverage === / === tff coverage === / === health === で行う。
+      # 入力値は ${{ }} でシェルに直接埋め込まず env 経由で渡す
+      # （workflow_dispatch の入力は任意の文字列を書けるため）
       - name: Rebuild history from official annual zips
-        run: python scripts/backfill.py --start-year "${{ github.event.inputs.start_year }}"
+        run: |
+          EXTRA=""
+          if [ "$ALLOW_PARTIAL" = "true" ]; then
+            EXTRA="--allow-partial"
+            echo "::warning title=allow_partial 有効::一部の年が取得できなくても成功扱いになります。"
+          fi
+          python scripts/backfill.py --start-year "$START_YEAR" $EXTRA
         env:
           PYTHONPATH: ${{ github.workspace }}/scripts
+          START_YEAR: ${{ github.event.inputs.start_year }}
+          ALLOW_PARTIAL: ${{ github.event.inputs.allow_partial }}
       - name: Commit and push
         run: |
           git config user.name "cot-bot"
@@ -31,6 +49,8 @@ jobs:
           if git diff --cached --quiet; then
             echo "No data changes."
           else
-            git commit -m "backfill COT history from ${{ github.event.inputs.start_year }}"
+            git commit -m "backfill COT history from $START_YEAR"
             git push
           fi
+        env:
+          START_YEAR: ${{ github.event.inputs.start_year }}

@@ -18,6 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Fetch latest COT and update feed
+        id: update
         run: python scripts/weekly_update.py
         env:
           PYTHONPATH: ${{ github.workspace }}/scripts
@@ -32,3 +33,16 @@ jobs:
             git commit -m "weekly COT update ($(date -u +%Y-%m-%d))"
             git push
           fi
+      # Legacyが取れていればデータは必ずcommitする。そのうえで、TFF取得失敗や
+      # 鮮度異常があった週は run を赤くして気づけるようにする（§6-2 / §6-3 対策）。
+      # このステップを commit の後ろに置くのが重要: 前に置くと、取れたLegacyの
+      # 最新週まで捨ててしまう。
+      - name: Fail the run if the feed is degraded
+        if: steps.update.outputs.degraded == '1'
+        run: |
+          echo "::error title=COT feed degraded::$REASON"
+          echo "データは commit 済みですが、一部が取得できていません。"
+          echo "上の 'Fetch latest COT and update feed' ステップの === health === を確認してください。"
+          exit 1
+        env:
+          REASON: ${{ steps.update.outputs.degraded_reason }}

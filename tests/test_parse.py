@@ -49,6 +49,8 @@ def main():
     test_tff()
     test_state()
     test_tff_legacy_bulk_format()
+    test_legacy_date_formats()
+    test_merge_preserves_history()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -154,6 +156,102 @@ def test_tff_legacy_bulk_format():
     assert out["lev_long"] == 40000 and out["lev_short"] == -60000
 
     print("TFF LEGACY BULK FORMAT TESTS PASSED")
+
+
+
+
+def test_legacy_date_formats():
+    """Legacyパーサも _normalize_date() を通ること（TFF側との統一・§6-1の再発防止）。
+
+    現行のLegacyファイルは週次・年次ZIPともISO日付だが、TFF統合ZIPでは
+    「ヘッダのラベルはISOなのに実データはMM/DD/YYYY」という不一致が実際に起きた。
+    Legacy側でISO決め打ちのままだと、同じことが起きたとき全行スキップ＝0件になり、
+    例外も出ないためワークフローは緑のまま通ってしまう。
+    """
+    from cot_common import parse_legacy_lines
+
+    base = ('"JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE",260721,%s,097741,'
+            'CME ,00,097 ,  423796,  107590,  259715,   18031,  254110,   99212')
+
+    # ISO（現行の実データ形式）
+    recs = parse_legacy_lines(base % "2026-07-21", {"097741"})
+    assert len(recs) == 1 and recs[0]["date"] == "2026-07-21", recs
+
+    # MM/DD/YYYY（統合ZIPで実際に踏んだ形式。Legacyで出ても落とさない）
+    recs = parse_legacy_lines(base % "07/21/2026 12:00:00 AM", {"097741"})
+    assert len(recs) == 1 and recs[0]["date"] == "2026-07-21", recs
+    assert recs[0]["oi"] == 423796 and recs[0]["nc_short"] == 259715
+
+    # ヘッダ行は従来どおりスキップされること
+    header = ('"Market and Exchange Names","As of Date in Form YYMMDD",'
+              '"As of Date in Form YYYY-MM-DD","097741",x,x,x,"Open Interest (All)",x,x')
+    assert parse_legacy_lines(header, {"097741"}) == []
+
+    print("LEGACY DATE FORMAT TESTS PASSED")
+
+
+
+
+def test_merge_preserves_history():
+    """バックフィルのマージ規則: 既存行は必ず残り、同じ日付だけが上書きされること。
+
+    backfill.py には以前「start_year より前のTFF行を捨てる」処理があり、
+    start_year に2005以外を入れると TFF履歴が最大1,021週消える状態だった
+    （Legacy側には同じ処理が無く非対称だった）。その規則を固定化する。
+    """
+    import shutil
+    import tempfile
+    import cot_common as cc
+    from cot_common import (read_symbol_csv, write_symbol_csv,
+                            read_tff_csv, write_tff_csv)
+
+    tmp = tempfile.mkdtemp(prefix="cot-test-")
+    orig_dir = cc.CSV_DIR
+    cc.CSV_DIR = tmp
+    try:
+        old = {
+            "2006-06-13": {"date": "2006-06-13", "all": 1, "long": 2, "short": -3, "net": -1},
+            "2010-01-05": {"date": "2010-01-05", "all": 4, "long": 5, "short": -6, "net": -1},
+        }
+        write_symbol_csv("zz_test", dict(old))
+
+        # backfill と同じ手順: 既存を読み → 取得分を同じ日付で上書き/追加
+        rows = read_symbol_csv("zz_test")
+        assert len(rows) == 2
+        rows["2010-01-05"] = {"date": "2010-01-05", "all": 40, "long": 50,
+                              "short": -60, "net": -10}          # 上書き
+        rows["2026-08-04"] = {"date": "2026-08-04", "all": 7, "long": 8,
+                              "short": -9, "net": -1}            # 追加
+        write_symbol_csv("zz_test", rows)
+
+        back = read_symbol_csv("zz_test")
+        assert len(back) == 3, back
+        assert back["2006-06-13"] == old["2006-06-13"], "start_year より前の行が消えた"
+        assert back["2010-01-05"]["all"] == 40, "同日付が上書きされていない"
+
+        tff_old = {"2006-06-13": {"date": "2006-06-13", "all": 1, "am_long": 2,
+                                  "am_short": -3, "am_net": -1, "lev_long": 4,
+                                  "lev_short": -5, "lev_net": -1}}
+        write_tff_csv("zz_test", dict(tff_old))
+        trows = read_tff_csv("zz_test")
+        trows["2026-08-04"] = {"date": "2026-08-04", "all": 9, "am_long": 1,
+                               "am_short": -1, "am_net": 0, "lev_long": 2,
+                               "lev_short": -2, "lev_net": 0}
+        write_tff_csv("zz_test", trows)
+        tback = read_tff_csv("zz_test")
+        assert len(tback) == 2, tback
+        assert tback["2006-06-13"] == tff_old["2006-06-13"], "TFFの古い行が消えた"
+
+        # 書き出しは日付昇順であること（SPEC 5-1）
+        assert sorted(back) == list(back.keys()) or True
+        with open(os.path.join(tmp, "zz_test.csv"), encoding="utf-8") as f:
+            dates = [ln.split(",")[0] for ln in f.read().splitlines()[1:]]
+        assert dates == sorted(dates), dates
+    finally:
+        cc.CSV_DIR = orig_dir
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    print("MERGE / NO-DATA-LOSS TESTS PASSED")
 
 
 if __name__ == "__main__":

@@ -226,8 +226,11 @@ function alignCell(st){
     mixed: ["不一致", "b-mixed"],
   };
   const [label, klass] = map[st.alignment] || ["—", "b-mixed"];
-  const sub = st.alignment === "divergence_warning" && st.levf_zerocross_weeks_ago !== null
-    ? `<span class="mom">LevF反転 ${st.levf_zerocross_weeks_ago}週前</span>` : "";
+  // levf_zerocross_weeks_ago は「最新週で反転したら0」。0を「0週前」と出すと
+  // 意味が取りづらいので、最新週だけ「今週」と表示する。
+  const w = st.levf_zerocross_weeks_ago;
+  const sub = st.alignment === "divergence_warning" && w !== null && w !== undefined
+    ? `<span class="mom">LevF反転 ${w === 0 ? "今週" : w + "週前"}</span>` : "";
   return `<td class="state grp"><span class="badge ${klass}">${label}</span>${sub}</td>`;
 }
 
