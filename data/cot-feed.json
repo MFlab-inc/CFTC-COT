@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-08-08 11:27:06 JST",
+  "generated_at": "2026-08-10 00:57:52 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -29,7 +29,7 @@
    "levf_zerocross_weeks": 8,
    "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
   },
-  "notes": "weekly update from https://www.cftc.gov/dea/newcot/deafut.txt",
+  "notes": "backfill 2005-2026 from official annual zips",
   "report_date_latest": "2026-08-04"
  },
  "symbols": {
