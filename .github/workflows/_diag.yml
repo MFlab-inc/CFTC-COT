@@ -1,0 +1,22 @@
+name: diag-symbol-search
+
+# 一時調査用ワークフロー。EUR/JPY等クロス円銘柄の単独コード有無をCFTC公式
+# 週次ファイルで検索する（読み取り専用・data/への書き込み/commitなし）。
+# 調査完了後にこのファイルと scripts/_diag_symbol_search.py は削除する。
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Search official CFTC weekly files for cross-rate contracts
+        run: python scripts/_diag_symbol_search.py
