@@ -253,7 +253,58 @@ CFTC公式FAQの「報告対象トレーダーが20者未満の銘柄はその�
 | usdjpy TFF 2026-07-07 → `am_net=+48,653 / lev_net=+90,083` | 一致 |
 | 同週 Legacy `net=+123,778` vs AM+Lev `=+138,736`（一致しないこと） | 一致 |
 
-### 10-5. 公開URLは不変
+### 10-5. フルバックフィルによる実データ検証（2026-08-09・run 31322502500）
+
+上記の修正後、作業ブランチ上で `backfill-history`（start_year=2005）を実行し、
+CFTC公式ZIPから全履歴を取り直した結果:
+
+| 項目 | 結果 |
+|---|---|
+| 取得URL | 33本（Legacy年次22 + TFF統合1 + TFF年次10）**全成功・失敗0** |
+| ダウンロード量 | 293.4 MB |
+| 実行時間 | 6.1 秒 |
+| TFF統合ZIP(2006-2016) | **3,990行**マッチ（§9修正前は0行だった箇所） |
+| Legacy coverage | 全11銘柄 **±0週**（usdjpy 1,127 / nikkei225 1,110 / sp500・nydow 843） |
+| TFF coverage | 全8銘柄 **±0週**（1,052 / sp500・nydow 843） |
+| **CSVの実差分** | **19ファイルすべて byte-identical（差分ゼロ）** |
+| commitされた変更 | `cot-feed.json` の `generated_at` と `notes` の2行のみ |
+
+**21年分をCFTC公式から取り直して全CSVが1バイトも変わらなかった**ことから、
+(a) 保存済みデータは現在の公式公表値と完全に一致している、
+(b) パーサ統一（§9追記）は実データに対しても出力を変えない、
+(c) TFF履歴の消失は起きていない、の3点が同時に確認された。
+
+### 10-6. 失敗検知が実際に働くことの確認（2026-08-09）
+
+ネットワークから cftc.gov に到達できない環境（§10-7）で
+`backfill.py --start-year 2024` を実行し、失敗経路を実測した。
+
+```
+=== health ===
+  urls attempted : 6 (legacy 3 + tff 3)
+  fetch failures : 6
+  downloaded     : 0.0 MB
+  elapsed        : 149.8 sec
+  empty symbols  : legacy=none tff=none
+    FAIL legacy .../deacot2024.zip  (URLError: ... 403 Forbidden)
+    ...
+  RESULT: FAILED - このrunは失敗として扱われ、data/ はcommitされません。
+### EXIT CODE = 1
+```
+
+同時に、**`--start-year 2024` を指定してもTFF coverage は 1,052週のまま（±0）**で
+あることを確認した（修正前の実装なら約950週が削られていた）。
+
+この実行は**修正前なら exit 0 = 緑✅で通り、しかもTFF履歴を削って
+commitしていた**ケースにあたる。
+
+**副次的な発見（重要）**: 成功時 293.4MB/6.1秒 に対し、全失敗時は 0.0MB/149.8秒
+（リトライのバックオフで長くなる）。つまり**実行時間は成否の判定に使えない**。
+従来 HANDOFF に記載されていた「実行時間が18秒より短ければ失敗を疑う」という
+判定基準は、成功を失敗と誤判定するため撤回した。判定は
+`fetch failures` と `downloaded (MB)` で行う。
+
+### 10-7. 公開URLは不変
 
 `data/cot-feed.json` と `index.html` はGit履歴上（改名追跡 `--follow`）一度も
 移動・改名されていない。以下のURLは初版から不変であり、今後も変更しない。
