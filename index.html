@@ -234,7 +234,8 @@ function alignCell(st){
   return `<td class="state grp"><span class="badge ${klass}">${label}</span>${sub}</td>`;
 }
 
-const ORDER = ["usdjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
+// 銘柄追加時はここへの追記が必須（HANDOFF §8）。symbols.py の SYMBOLS と揃えること。
+const ORDER = ["usdjpy","eurjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
                "nydow","wti","gold","copper","us10y"];
 
 function renderLegacy(feed){

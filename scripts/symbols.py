@@ -11,6 +11,12 @@ sign_invert:
           （2026-07-21行でCFTC公式との照合一致を確認済み）。
   False = 生値のまま（long = 非商業ロング, short = -非商業ショート）
 
+  なぜ USD/JPY だけ反転が要るか（EUR/JPY との違い・混同注意）:
+    - 日本円先物(097741)は「1円=何ドル」建て。ロング=円買い=USD/JPY下落方向。
+      よってUSD/JPY方向で読むには反転が必要 → sign_invert=True
+    - ユーロ円クロス先物(399741)は「1ユーロ=何円」建て。ロング=ユーロ買い円売り
+      =EUR/JPY上昇方向。既にペア表記と同じ向きなので反転不要 → sign_invert=False
+
 fallback_codes:
   主コードがその週のレポートに存在しない場合に代替検索するコード。
   Consolidated系（13874+ / 12460+）は導入前の期間に主コードが存在しない
@@ -29,6 +35,17 @@ SYMBOLS = [
         "sign_invert": True,
         "fallback_codes": [],
         "note": "円先物を USD/JPY 方向に符号変換。net プラス = 投機筋の円ショート優勢",
+    },
+    {
+        "slug": "eurjpy",
+        "tff": True,
+        "label": "EUR/JPY",
+        "code": "399741",
+        "market_hint": "EURO FX/JAPANESE YEN XRATE",
+        "sign_invert": False,
+        "fallback_codes": [],
+        "note": "CMEユーロ円クロスレート先物（1ユーロ=何円建て）。合成値ではなくCFTC公式の"
+                "単独銘柄。建玉が小さく報告者20者未満で欠測する週がある",
     },
     {
         "slug": "gbpusd",

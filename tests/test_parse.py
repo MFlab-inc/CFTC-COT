@@ -51,6 +51,7 @@ def main():
     test_tff_legacy_bulk_format()
     test_legacy_date_formats()
     test_merge_preserves_history()
+    test_symbols_and_dashboard_in_sync()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -252,6 +253,55 @@ def test_merge_preserves_history():
         shutil.rmtree(tmp, ignore_errors=True)
 
     print("MERGE / NO-DATA-LOSS TESTS PASSED")
+
+
+
+
+def test_symbols_and_dashboard_in_sync():
+    """index.html の ORDER 配列が symbols.py の SLUG_ORDER と一致していること。
+
+    HANDOFF §8 に「銘柄追加時は ORDER への追記が必須」とあるが、従来は手作業ルール
+    だったため追記漏れがあってもテストは通り、ダッシュボードにだけ出ない状態になる
+    （フィードJSONには入るので気づきにくい）。ここで機械的に突き合わせる。
+    """
+    import re
+    from symbols import SYMBOLS, SLUG_ORDER
+
+    html_path = os.path.join(os.path.dirname(__file__), "..", "index.html")
+    with open(html_path, encoding="utf-8") as f:
+        html = f.read()
+
+    m = re.search(r"const ORDER = \[(.*?)\];", html, re.S)
+    assert m, "index.html に ORDER 配列が見つからない"
+    order = re.findall(r'"([a-z0-9_]+)"', m.group(1))
+
+    assert order == SLUG_ORDER, (
+        "index.html の ORDER と symbols.py の SLUG_ORDER が不一致。\n"
+        "  index.html : %s\n  symbols.py : %s\n"
+        "  ORDERにない: %s\n  SYMBOLSにない: %s"
+        % (order, SLUG_ORDER,
+           [s for s in SLUG_ORDER if s not in order],
+           [s for s in order if s not in SLUG_ORDER]))
+
+    # 銘柄定義の必須キーと値の妥当性もあわせて検査する
+    seen_slugs, seen_codes = set(), {}
+    for s in SYMBOLS:
+        for key in ("slug", "label", "code", "sign_invert", "tff", "note"):
+            assert key in s, "%s に %s が無い" % (s.get("slug"), key)
+        assert s["slug"] not in seen_slugs, "slug重複: %s" % s["slug"]
+        seen_slugs.add(s["slug"])
+        assert s["code"] not in seen_codes, (
+            "CFTCコード重複: %s が %s と %s に使われている"
+            % (s["code"], seen_codes.get(s["code"]), s["slug"]))
+        seen_codes[s["code"]] = s["slug"]
+        assert isinstance(s["sign_invert"], bool)
+        assert isinstance(s["tff"], bool)
+
+    # 反転が要るのは日本円先物(097741)だけ。EUR/JPY(399741)は既にペア方向なので反転しない
+    inverted = sorted(s["slug"] for s in SYMBOLS if s["sign_invert"])
+    assert inverted == ["usdjpy"], "sign_invert=True は usdjpy のみのはず: %s" % inverted
+
+    print("SYMBOLS / DASHBOARD SYNC TESTS PASSED (%d symbols)" % len(SYMBOLS))
 
 
 if __name__ == "__main__":
