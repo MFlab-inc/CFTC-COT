@@ -194,6 +194,73 @@ def write_symbol_csv(slug, rows_by_date):
     return path
 
 
+# 連続とみなす最大の間隔（日）。COTは週次なので通常7日、祝日ずれで6/8日になる。
+MAX_CONTIGUOUS_GAP_DAYS = 10
+# weeks_52 / change_1w を「暦の」窓で切るための許容幅
+WEEKS_52_DAYS = 52 * 7
+CHANGE_1W_MAX_DAYS = 10
+
+
+def rows_last_52_weeks(rows, dates):
+    """直近52**週（暦）**の行を返す。
+
+    従来は dates[-52:]（直近52**件**）だった。欠測のある銘柄では
+    52件が暦で119週分になり、「52週推移」というラベルと実態が食い違う
+    （eurjpy 実測: 52件 = 833日 = 119週）。欠測のない銘柄では従来と同じ結果になる。
+    """
+    if not dates:
+        return []
+    cutoff = datetime.strptime(dates[-1], "%Y-%m-%d") - timedelta(days=WEEKS_52_DAYS - 7)
+    return [rows[d] for d in dates
+            if datetime.strptime(d, "%Y-%m-%d") >= cutoff]
+
+
+def change_vs_prev(latest, prev, keys):
+    """前週比。prev が暦で直前の週でない場合は None を返す。
+
+    prev は「直前の**行**」であって「直前の**週**」とは限らない。eurjpy は
+    隣接行が7日でない割合が17%あり、最大434日離れている。それを「前週比」として
+    出すのは誤りなので、暦で1週相当でなければ出さない。
+    """
+    if not latest or not prev:
+        return None
+    gap = (datetime.strptime(latest["date"], "%Y-%m-%d")
+           - datetime.strptime(prev["date"], "%Y-%m-%d")).days
+    if gap > CHANGE_1W_MAX_DAYS:
+        return None
+    return {k: latest[k] - prev[k] for k in keys}
+
+
+def coverage_block(dates):
+    """coverage ブロックを作る。
+
+    weeks は「保存されている行数」であって「初回から連続して存在する週数」では
+    ない点に注意。eurjpy のように報告者20者未満で除外される週が多い銘柄では
+    両者が大きく食い違うため、期間内の在席率を contiguous / present_ratio として
+    明示し、利用側が連続系列と誤解しないようにする。
+    """
+    if not dates:
+        return {"first_date": None, "last_date": None, "weeks": 0,
+                "span_weeks": 0, "present_ratio": None,
+                "max_gap_days": None, "contiguous": None}
+    span = int(_weeks_between(dates[0], dates[-1])) + 1
+    ratio = round(len(dates) / span, 3) if span else None
+    max_gap = max((datetime.strptime(b, "%Y-%m-%d") - datetime.strptime(a, "%Y-%m-%d")).days
+                  for a, b in zip(dates, dates[1:])) if len(dates) >= 2 else 0
+    return {
+        "first_date": dates[0],
+        "last_date": dates[-1],
+        "weeks": len(dates),
+        "span_weeks": span,
+        "present_ratio": ratio,
+        "max_gap_days": max_gap,
+        # 「行数 vs 期間」の比ではなく**最大の穴**で判定する。比だけだと
+        # 1箇所に大穴があっても全体では高い比率になり得るため。
+        # 祝日ずれ（6日/8日）は正常なので許容幅を持たせる。
+        "contiguous": max_gap <= MAX_CONTIGUOUS_GAP_DAYS,
+    }
+
+
 def build_feed_json(symbols, generated_note=""):
     """全銘柄CSVから cot-feed.json を再生成する。"""
     now_jst = datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S JST")
@@ -230,22 +297,15 @@ def build_feed_json(symbols, generated_note=""):
             "cftc_code": s["code"],
             "sign_convention": "usdjpy_direction(inverted)" if s["sign_invert"] else "raw",
             "note": s.get("note", ""),
-            "coverage": {
-                "first_date": dates[0] if dates else None,
-                "last_date": dates[-1] if dates else None,
-                "weeks": len(dates),
-            },
+            "coverage": coverage_block(dates),
             "latest": rows[dates[-1]] if dates else None,
             "prev": rows[dates[-2]] if len(dates) >= 2 else None,
             "change_1w": None,
-            "weeks_52": [rows[d] for d in dates[-52:]],
-            "state": (legacy_state([rows[d]["net"] for d in dates]) if dates else None),
+            "weeks_52": rows_last_52_weeks(rows, dates),
+            "state": (legacy_state([rows[d]["net"] for d in dates], dates) if dates else None),
         }
-        if entry["latest"] and entry["prev"]:
-            entry["change_1w"] = {
-                k: entry["latest"][k] - entry["prev"][k]
-                for k in ("all", "long", "short", "net")
-            }
+        entry["change_1w"] = change_vs_prev(entry["latest"], entry["prev"],
+                                            ("all", "long", "short", "net"))
         entry["tff"] = tff_feed_entry(s)
         if dates:
             latest_dates.append(dates[-1])
@@ -361,17 +421,15 @@ def tff_feed_entry(sym):
     entry = {
         "available": True,
         "source_report": "Traders in Financial Futures (Futures Only)",
-        "coverage": {"first_date": dates[0], "last_date": dates[-1],
-                     "weeks": len(dates)},
+        "coverage": coverage_block(dates),
         "latest": latest, "prev": prev,
-        "change_1w": ({k: latest[k] - prev[k]
-                       for k in ("am_net", "lev_net")} if prev else None),
-        "weeks_52": [{"date": rows[d]["date"], "am_net": rows[d]["am_net"],
-                      "lev_net": rows[d]["lev_net"]} for d in dates[-52:]],
+        "change_1w": change_vs_prev(latest, prev, ("am_net", "lev_net")),
+        "weeks_52": [{"date": r["date"], "am_net": r["am_net"], "lev_net": r["lev_net"]}
+                     for r in rows_last_52_weeks(rows, dates)],
     }
     am_nets = [rows[d]["am_net"] for d in dates]
     lev_nets = [rows[d]["lev_net"] for d in dates]
-    align, cross_ago = tff_alignment(am_nets, lev_nets)
+    align, cross_ago = tff_alignment(am_nets, lev_nets, dates)
     entry["state"] = {
         "alignment": align,
         "levf_zerocross_weeks_ago": cross_ago,
@@ -391,13 +449,18 @@ STATE_THRESHOLDS = {
     "percentile_biased":  [25, 75],   # p<=25 or p>=75 → biased
     "momentum_weeks": 4,              # 勢い判定: net の4週差分
     "levf_zerocross_weeks": 8,        # LevF直近ゼロクロス判定の遡り週数
+    "min_samples_for_bias": 26,       # 偏り度を出すのに必要な最小サンプル数（半年）
     "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可",
 }
 
 
 def percentile_of_last(values):
-    """系列の最終値が全期間の中で何パーセンタイルか（当該値以下の割合×100）。"""
-    if len(values) < 2:
+    """系列の最終値が全期間の中で何パーセンタイルか（当該値以下の割合×100）。
+
+    サンプルが少なすぎる場合は None。2件しかないと必ず p=100 か p=50 になり、
+    classify_bias が「極端」を返してしまうため（新規追加銘柄で誤表示になる）。
+    """
+    if len(values) < STATE_THRESHOLDS["min_samples_for_bias"]:
         return None
     cur = values[-1]
     return round(sum(1 for v in values if v <= cur) / len(values) * 100, 1)
@@ -416,11 +479,33 @@ def classify_bias(p):
     return "neutral"
 
 
-def momentum_state(nets):
-    """net系列 -> (4週差分, ラベル)。5週未満は (None, None)。"""
+def _weeks_between(d_from, d_to):
+    """ISO日付文字列2つの間の週数（小数）。"""
+    a = datetime.strptime(d_from, "%Y-%m-%d")
+    b = datetime.strptime(d_to, "%Y-%m-%d")
+    return (b - a).days / 7.0
+
+
+def momentum_state(nets, dates=None):
+    """net系列 -> (4週差分, ラベル)。5週未満は (None, None)。
+
+    dates を渡した場合、「4件前」が実際に暦の上でも約4週前かを検査する。
+    eurjpy のように報告者20者未満で欠測する週がある銘柄では、4件前が
+    暦では20週前ということが起こり得るため、その場合は 4週差分として
+    提示せず (None, None) を返す（誤った数値を出すよりは出さない）。
+    """
     w = STATE_THRESHOLDS["momentum_weeks"]
     if len(nets) < w + 1:
         return None, None
+    if dates is not None:
+        if len(dates) != len(nets):
+            return None, None
+        spanned = _weeks_between(dates[-1 - w], dates[-1])
+        # 許容は0.5週まで（祝日ずれの±1日を吸収する幅）。以前は1.5週にしていたが、
+        # それだと欠測1週を含む「実質5週」の窓が4週として出てしまう
+        # （eurjpy 実測で234窓中42窓が該当）。
+        if spanned > w + 0.5:
+            return None, None
     delta = nets[-1] - nets[-1 - w]
     cur = nets[-1]
     if cur > 0:
@@ -436,18 +521,34 @@ def _sign(x):
     return (x > 0) - (x < 0)
 
 
-def tff_alignment(am_nets, lev_nets):
+def tff_alignment(am_nets, lev_nets, dates=None):
     """AM×LevF整合状態 -> (state, levf_cross_weeks_ago)
     aligned: 符号一致 / divergence_warning: 符号不一致かつLevFが直近K週内にゼロクロス /
-    mixed: 符号不一致（直近クロスなし）"""
+    mixed: 符号不一致（直近クロスなし）
+
+    dates を渡した場合、ゼロクロスの「○週前」は件数ではなく**暦の週数**で数える。
+    欠測のある銘柄（eurjpy等）で「8件前」が暦では40週前になる誤表示を防ぐ。
+    """
     if not am_nets or not lev_nets:
         return None, None
     k = STATE_THRESHOLDS["levf_zerocross_weeks"]
     cross_ago = None
     tail = lev_nets[-(k + 1):]
+    tail_dates = dates[-(k + 1):] if (dates and len(dates) == len(lev_nets)) else None
     for i in range(len(tail) - 1, 0, -1):
         if _sign(tail[i]) != 0 and _sign(tail[i - 1]) != 0 and _sign(tail[i]) != _sign(tail[i - 1]):
-            cross_ago = len(tail) - 1 - i
+            if tail_dates is not None:
+                # クロスを挟む2点自体が離れている場合、実際にいつ符号が反転したかは
+                # 特定できない（例: 前回観測が1年前なら、その間のどこかで反転した）。
+                # 「○週前」と断定せず不明として扱う。
+                if _weeks_between(tail_dates[i - 1], tail_dates[i]) > 2:
+                    break
+                weeks = _weeks_between(tail_dates[i], tail_dates[-1])
+                if weeks > k:
+                    break      # 暦では K週より前 = 「直近のクロス」とは呼べない
+                cross_ago = int(round(weeks))
+            else:
+                cross_ago = len(tail) - 1 - i
             break
     if _sign(am_nets[-1]) == _sign(lev_nets[-1]) and _sign(am_nets[-1]) != 0:
         return "aligned", cross_ago
@@ -456,9 +557,9 @@ def tff_alignment(am_nets, lev_nets):
     return "mixed", cross_ago
 
 
-def legacy_state(rows_sorted_nets):
+def legacy_state(rows_sorted_nets, dates=None):
     p = percentile_of_last(rows_sorted_nets)
-    delta, label = momentum_state(rows_sorted_nets)
+    delta, label = momentum_state(rows_sorted_nets, dates)
     cur = rows_sorted_nets[-1] if rows_sorted_nets else None
     return {
         "percentile_all": p,

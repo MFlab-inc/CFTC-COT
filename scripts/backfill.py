@@ -83,6 +83,7 @@ def main():
 
     cmap = code_map()
     wanted = set(cmap.keys())
+    names_by_code = {}   # CFTCコード -> 公式ファイル上の契約名（最後に見た年のもの）
 
     per_symbol = {s["slug"]: read_symbol_csv(s["slug"]) for s in SYMBOLS}
     before_legacy = {k: len(v) for k, v in per_symbol.items()}
@@ -103,6 +104,8 @@ def main():
             sym = cmap[rec["code"]]
             row = to_feed_row(rec, sym["sign_invert"])
             per_symbol[sym["slug"]][row["date"]] = row
+            # 最新年の契約名を保持して market_hint と突き合わせる（下記 health）
+            names_by_code[rec["code"]] = rec["market_name"]
             n += 1
         print("%d: %s -> %d rows (%d bytes)" % (year, url, n, len(text)))
         if n == 0:
@@ -196,6 +199,24 @@ def main():
     elapsed = time.monotonic() - t0
     empty_legacy = [s["slug"] for s in SYMBOLS if not per_symbol[s["slug"]]]
     empty_tff = [s["slug"] for s in tff_syms if not tff_rows[s["slug"]]]
+    # 契約名の照合: CFTCコードが別の契約に振り替えられていないかを見る。
+    # symbols.py の market_hint は従来どこからも参照されておらず、コードが
+    # 別商品に付け替えられても気づけなかった（銘柄ラベルは正しいまま中身だけ別物になる）。
+    # 表記ゆれで誤検知し得るため**警告のみ**とし、実際の契約名は必ずログに出す。
+    print("\n=== contract names (official) ===")
+    hint_mismatch = []
+    for s in SYMBOLS:
+        actual = names_by_code.get(s["code"])
+        if actual is None:
+            print("  %-10s code=%-7s (この範囲では未取得)" % (s["slug"], s["code"]))
+            continue
+        hint = (s.get("market_hint") or "").strip().upper()
+        ok = hint and hint in actual.upper()
+        print("  %-10s code=%-7s %s  %s" % (s["slug"], s["code"], actual,
+                                            "" if ok else "  <-- hint不一致"))
+        if not ok:
+            hint_mismatch.append("%s(hint=%r actual=%r)" % (s["slug"], s.get("market_hint"), actual))
+
     print("\n=== health ===")
     print("  urls attempted : %d (legacy %d + tff %d)"
           % (args.end_year - args.start_year + 1 + len(tff_urls),
@@ -205,12 +226,24 @@ def main():
     print("  elapsed        : %.1f sec" % elapsed)
     print("  empty symbols  : legacy=%s tff=%s"
           % (empty_legacy or "none", empty_tff or "none"))
+    print("  hint mismatch  : %d" % len(hint_mismatch))
+    for m in hint_mismatch:
+        print("    WARN market_hint が公式の契約名と一致しません: %s" % m)
+    if hint_mismatch:
+        print("    → コードが別契約に振り替えられていないかCFTC公式で確認し、"
+              "問題なければ symbols.py の market_hint を実際の名称に合わせること")
     for kind, url, err in failures:
         print("    FAIL %-6s %s  (%s)" % (kind, url, err))
     if empty_legacy:
-        print("  FATAL: Legacy側に0週の銘柄があります: %s" % empty_legacy)
-    if failures or empty_legacy:
-        if args.allow_partial and not empty_legacy:
+        print("  ERROR: Legacy側に0週の銘柄があります: %s" % empty_legacy)
+    if empty_tff:
+        print("  ERROR: tff=True なのに0週の銘柄があります: %s" % empty_tff)
+    if failures or empty_legacy or empty_tff:
+        # --allow-partial は「空」も救済する。開始年が遅い銘柄（eurjpyは2017〜）は
+        # 狭い年範囲でバックフィルすると正当に0週になり得るため、ここを
+        # 救済不可にすると範囲指定のバックフィルが常に失敗してしまう。
+        # 一方、週数の減少（＝データ消失）は上で無条件に止めており救済されない。
+        if args.allow_partial:
             print("  RESULT: DEGRADED (--allow-partial のため正常終了扱い)")
             return 0
         print("  RESULT: FAILED - このrunは失敗として扱われ、data/ はcommitされません。")

@@ -11,7 +11,7 @@
 
 ## 0. プロジェクト概要
 
-CFTC公式のCOT（Commitments of Traders）レポートから対象11銘柄の建玉を
+CFTC公式のCOT（Commitments of Traders）レポートから対象12銘柄の建玉を
 毎週自動取得し、GitHub Pages上で機械可読フィードとして公開するシステム。
 **稼働中・全機能検収済み（2026-07-27時点）**。
 
@@ -31,7 +31,9 @@ FX市況レポート（週次）およびスイング戦略の環境認識材料
 
 ---
 
-## 1. リポジトリ構成（約2,080行 / 2026-08-09時点）
+## 1. リポジトリ構成（2026-08-09時点）
+
+※ 下記の行数は目安。正確な値は `wc -l` で都度確認すること（更新漏れが起きやすいため）。
 
 ```
 CFTC-COT/
@@ -48,8 +50,8 @@ CFTC-COT/
 ├── data/
 │   ├── cot-feed.json       # ★統合フィード（自動生成・commit対象）
 │   └── csv/
-│       ├── {slug}.csv      # Legacy 11銘柄
-│       └── {slug}_tff.csv  # TFF 8銘柄
+│       ├── {slug}.csv      # Legacy 12銘柄
+│       └── {slug}_tff.csv  # TFF 9銘柄
 ├── index.html              # ダッシュボード（321行・単一ファイル・CSS/JS内包）
 ├── docs/
 │   ├── SPEC.md             # データ仕様書（312行）※検証記録はここに追記する
@@ -63,7 +65,8 @@ CFTC-COT/
 export PYTHONPATH=scripts
 python scripts/backfill.py --start-year 2005   # 履歴再構築（全銘柄・Legacy+TFF）
 python scripts/weekly_update.py                # 最新週の取り込み
-python tests/test_parse.py                     # 全テスト（4ブロック・全件合格が正常）
+python tests/test_parse.py                     # 全テスト（10ブロック・全件合格が正常）
+                                               # ※CIでも自動実行される
 ```
 
 ---
@@ -118,6 +121,7 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
 | slug | 銘柄 | CFTCコード | sign_invert | tff | 取得実績（検収済み） |
 |---|---|---|---|---|---|
 | usdjpy | USD/JPY | 097741 | **True** | ○ | Legacy 2005-01-04〜1,125週 / TFF 2006-06-13〜1,050週 |
+| eurjpy | EUR/JPY | 399741 | False | ○ | **2026-08-09追加**。Legacy 2017-08-01〜238週 / TFF 240週（下記注） |
 | gbpusd | GBP/USD | 096742 | False | ○ | 同上 |
 | eurusd | EUR/USD | 099741 | False | ○ | 同上 |
 | audusd | AUD/USD | 232741 | False | ○ | 同上 |
@@ -142,6 +146,11 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
   （散発的に起きるのではなく、2005年前半に限られた現象）。
   ※ 除外理由そのものはCFTC公式で未確認
 - `wti` / `gold` / `copper`: TFFは金融先物のみが対象のため構造的に存在しない（JSONで `tff: null`）
+- **`eurjpy` は欠測が非常に多い（在席率約51%）**。2017-08-01〜2026-08-04 の471週のうち
+  Legacy 238週・TFF 240週しか存在せず、**最長61週の連続欠測**がある（SPEC §12-2）。
+  建玉がUSD/JPYの約5%（OI 約2万枚 vs 約42万枚）と薄く、報告者20者未満で除外されるため。
+  直近1年は53週中47週あり改善しているが、**連続系列として扱ってはいけない**。
+  JSONの `coverage.present_ratio` / `coverage.contiguous` で機械的に判定できる
 
 ---
 
@@ -150,9 +159,23 @@ python tests/test_parse.py                     # 全テスト（4ブロック・
 | slug | sign_convention | 規則 |
 |---|---|---|
 | usdjpy | `usdjpy_direction(inverted)` | `long` = 円先物の非商業**ショート**（＝USD/JPY買い方向）<br>`short` = −（円先物の非商業ロング）<br>**net プラス＝投機筋の円ショート優勢** |
-| 上記以外 | `raw` | `long` = 非商業ロング、`short` = −非商業ショート |
+| 上記以外（eurjpy含む） | `raw` | `long` = 非商業ロング、`short` = −非商業ショート |
 
 TFF側（`am_*` / `lev_*`）も**同一の符号規則**を適用する（`to_tff_row(rec, sign_invert)`）。
+
+### ★ USD/JPY と EUR/JPY で扱いが違う理由（混同注意）
+どちらも「円が絡むペア」だが、**先物の建て方が逆**なので反転の要否が異なる。
+
+| 先物 | 建て方 | ロングの意味 | sign_invert |
+|---|---|---|---|
+| 日本円先物 097741 | 1円 = 何ドル | 円買い ＝ **USD/JPY下落**方向 | **True**（反転が必要） |
+| ユーロ円クロス 399741 | 1ユーロ = 何円 | ユーロ買い円売り ＝ **EUR/JPY上昇**方向 | **False**（既にペア方向） |
+
+つまり `eurjpy` は **net プラス＝投機筋のユーロロング／円ショート優勢**で、
+ペア表記とそのまま同じ向きになる。ここを反転させると符号が逆になるので触らないこと。
+**2026-08-09に所有者により「現在の符号設定で正しい・反転不要」と確認済み**（SPEC §12-4）。
+`tests/test_parse.py::test_symbols_and_dashboard_in_sync` が
+「sign_invert=True は usdjpy のみ」を機械的に固定している。
 
 **検証記録（変更時の回帰基準・tests に固定化済み）**:
 - CFTC公式 2026-07-21付 JAPANESE YEN Code-097741
@@ -178,7 +201,13 @@ meta:
   source{weekly, historical, note} / schema{各列の説明} / state_thresholds / notes
 symbols.{slug}:
   label / cftc_code / sign_convention / note
-  coverage{first_date, last_date, weeks}
+  coverage{first_date, last_date, weeks, span_weeks, present_ratio, max_gap_days, contiguous}
+    # weeks は「保存されている行数」であって連続週数ではない。
+    # span_weeks=初回〜最新の暦週数 / present_ratio=weeks÷span_weeks
+    # max_gap_days=隣接2週の最大間隔 / contiguous = max_gap_days<=10
+    # contiguous=false の銘柄（eurjpy: max_gap_days=434）は連続系列として扱わないこと
+  change_1w  # 直前の行が暦で1週前でなければ null（前週比として出さない）
+  weeks_52   # 直近52**週（暦）**の行。件数ではないので欠測銘柄では52件未満になる
   latest / prev / change_1w{all,long,short,net}
   weeks_52[]                      # 直近52週の行
   state{...}                      # §5-3
@@ -202,13 +231,13 @@ levf_zerocross_weeks = 8        # LevF直近ゼロクロス判定の遡り週数
 | percentile_all | 現在netの**全履歴**パーセンタイル（当該値以下の割合×100） |
 | bias | extreme / biased / neutral（境界は外側に割当て＝保守側） |
 | side | long / short / flat |
-| momentum_4w / momentum_label | net の4週差分と方向ラベル（積み増し/縮小/横ばい） |
+| momentum_4w / momentum_label | net の4週差分と方向ラベル（積み増し/縮小/横ばい）。<br>**欠測をまたぐ場合は null**（「4件前」が暦で4週前でないときは数値を出さない） |
 
 **TFF `tff.state`**（`tff_alignment()`）
 | キー | 定義 |
 |---|---|
 | alignment | `aligned`（AM・LevF符号一致＝持続性高）/ `divergence_warning`（不一致かつLevFが直近8週内にゼロクロス＝転換警戒）/ `mixed`（不一致・直近クロスなし） |
-| levf_zerocross_weeks_ago | LevF直近ゼロクロスが何週前か（8週超は null） |
+| levf_zerocross_weeks_ago | LevF直近ゼロクロスが何週前か（8週超は null）。<br>**暦の週数**で数える。クロスを挟む2点が2週以上離れていて反転時期を特定できない場合は null（＝`mixed` 扱い） |
 | lev_percentile_all / lev_bias | LevF net の全履歴パーセンタイルと偏り度 |
 
 ---
@@ -390,7 +419,8 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 
 **Claude Code移行後は git push が使えるため、この制約は解消された（2026-08-09 移行完了）。**
 ただし以下は維持すること:
-- コミット前に `python tests/test_parse.py` **全6ブロック合格**を確認
+- コミット前に `python tests/test_parse.py` **全10ブロック合格**を確認
+  （2026-08-09より両ワークフローの先頭でも自動実行されるようになった）
   （あわせて `python -m py_compile scripts/*.py tests/*.py`・§6-2の教訓）
 - パーサ・符号規則の変更時は `backfill-history` を再実行し coverage で検証
 - 公式データ形式に関する新しい発見は `docs/SPEC.md` に検証記録として追記
@@ -419,10 +449,21 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 | 2026-08-09 | `docs/SPEC.md` 冒頭の混入行を削除、検証記録 §10・§11 を追記 |
 | 2026-08-09 | **フルバックフィル実行（run 31322502500）→ 全33URL成功・CSV19本が byte-identical** |
 | 2026-08-09 | 失敗経路も実測（exit 1・0.0MB）。旧ルール「18秒より短ければ失敗」を**誤りとして撤回**（§6-3） |
+| 2026-08-09 | **EUR/JPY（399741）を12銘柄目として追加**。公式週次でLegacy/TFF両方に実在を確認（SPEC §12-1） |
+| 2026-08-09 | eurjpy の欠測を実測（在席率51%・最大434日）。状態計算を暦ベースに修正（SPEC §12-2/12-3） |
+| 2026-08-09 | 多視点レビューで自作コードの欠陥10件を検出・修正。**テストがCIで未実行だった問題**も是正 |
+| 2026-08-09 | `market_hint` が未使用だったため、契約名の照合をbackfillのhealthに追加 |
+| 2026-08-09 | 照合初回で wti の名称不一致を検出→**データは正常**（建玉189万枚で主要WTI契約と確認）、hintを実名に更新（SPEC §13-3） |
+| 2026-08-09 | **eurjpy の符号規則を所有者が確認・確定**（sign_invert=False で正しい） |
 
-現在のテスト構成（`tests/test_parse.py`・**全6ブロック合格が正常**）:
+現在のテスト構成（`tests/test_parse.py`・**全10ブロック合格が正常**）:
 `main()`（Legacy符号規則）/ `test_tff()` / `test_state()` / `test_tff_legacy_bulk_format()` /
-`test_legacy_date_formats()` / `test_merge_preserves_history()`
+`test_legacy_date_formats()` / `test_merge_preserves_history()` /
+`test_symbols_and_dashboard_in_sync()` / `test_gappy_series_state()` /
+`test_weeks_52_and_change_1w_are_calendar_based()` / `test_min_samples_for_bias()`
+
+**2026-08-09より両ワークフローの先頭で自動実行される**（従来はローカル実行のみで、
+テストを追加しても実際には誰も回していない状態だった）。
 
 ### 2026-08-09 の変更が既存データに影響しないことの確認
 既存CSVから `cot-feed.json` を再生成して変更前と全文比較した結果、

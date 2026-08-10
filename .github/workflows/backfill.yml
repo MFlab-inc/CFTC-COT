@@ -24,6 +24,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Run parser and sign-convention tests
+        run: python tests/test_parse.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}/scripts
       # スクリプトが異常終了した場合は、この次の commit ステップが実行されない。
       # 取得漏れのある中途半端なデータがリポジトリに入らないための設計。
       # 判定はログ末尾の === coverage === / === tff coverage === / === health === で行う。

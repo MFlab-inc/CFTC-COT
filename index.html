@@ -76,6 +76,21 @@ details.guide .g b.tag{display:inline-block;background:var(--bg);border:1px soli
   border-radius:3px;padding:0 6px;margin-right:6px;font-size:11.5px;color:var(--sub)}
 details.guide .caveat{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);
   color:var(--sub)}
+/* --- 欠測銘柄の注意表示（eurjpy等・在席率が低い系列） --- */
+/* 市況の「極端/偏り」バッジと混同しないよう、データ品質の警告は
+   専用の琥珀色＋⚠で示し、状態バッジとは別カラムに置く */
+.alert{background:#FBF3E2;border:1px solid #D9B36A;border-left:4px solid #C8891F;
+  padding:10px 14px;margin:0 0 14px;font-size:12.5px;color:#6B4600}
+.alert b{color:#8A5A00}
+.alert ul{margin:6px 0 0 18px}
+.alert li{margin:2px 0}
+.b-stale{color:#8A5A00;border-color:#C8891F;background:#FBF3E2}
+td.dt{white-space:nowrap}
+td.dt .stale{display:block;font-family:'IBM Plex Sans JP',sans-serif;font-size:10.5px;
+  font-weight:700;color:#8A5A00;margin-top:2px}
+.thin{display:inline-block;font-family:'IBM Plex Sans JP',sans-serif;font-size:10px;
+  font-weight:700;color:#8A5A00;background:#FBF3E2;border:1px solid #D9B36A;
+  border-radius:3px;padding:0 4px;margin-left:5px;vertical-align:1px;cursor:help}
 #status{padding:32px;text-align:center;color:var(--sub)}
 footer{margin-top:28px;font-size:12px;color:var(--sub)}
 footer a{color:var(--accent)}
@@ -101,6 +116,8 @@ footer a{color:var(--accent)}
     LevFゼロクロス: 直近8週）による機械的な参考表示であり、<b>売買助言ではありません</b>。
   </p>
 
+  <div id="alert-stale" hidden></div>
+
   <details class="guide">
     <summary>📖 データの読み方（トレード活用ガイド）</summary>
     <p class="g"><b class="tag">Legacy 非商業</b>
@@ -121,6 +138,22 @@ footer a{color:var(--accent)}
       LevFが先に反転しAMがまだ旧方向 → <b>転換初期の可能性</b>。
       AMとLevFが同方向に揃う → <b>持続性の高いトレンド</b>。
       52週推移の2本線（青=AM／橙=LevF）の交差・乖離で目視確認できる。</p>
+    <p class="g"><b class="tag">⚠ EUR/JPY の扱い</b>
+      <b>他の銘柄と同じ感覚で読まないこと。</b> ユーロ円クロス先物（399741）は建玉が
+      USD/JPYの約5%（約2万枚 vs 約42万枚）と薄く、CFTCの「報告者20者未満の週は除外」に
+      頻繁に該当する。実測で<b>在席率は約51%</b>（2017-08-01以降の471週中238週のみ）、
+      <b>最長434日＝62週の連続欠測</b>があり、<b>2024年は53週中13週＝25%</b>しか無かった。
+      年によって在席率が大きく変動し、安定して取得できる保証はない。
+      <br>① <b>締め日が対象週と違えば「前週の値」が残る</b>。数値だけ見ても気づけないので、
+      必ず締め日を確認する（該当週は上部に警告を出し、行にも
+      <span class="badge b-stale">⚠ 前週値</span> を表示する）。
+      ② netは数千枚単位で、他ペアと<b>絶対値で比較しても意味がない</b>。使うなら自身の履歴との相対（パーセンタイル）。
+      ③ パーセンタイルの母集団は在席した238週のみで、連続1,127週の他銘柄より信頼度が低い。
+      ④ 52週推移は点が欠けるため<b>間隔が均等ではない</b>（現在47点）。
+      ⑤ 前週比・4週勢いが「—」なのは<b>「変化なし」ではなく「暦が飛んでいて計算できない」</b>の意味。
+      ⑥ 「○週連続」等の期間表現には使えない。
+      <br>銘柄名の <span class="thin">欠測多</span> は「この系列は穴あき」の印。
+      詳細は docs/SPEC.md §12。</p>
     <p class="caveat">注意: COTは火曜締め・金曜公表（3日遅れ・週次）の環境認識データであり、
       単独の売買シグナルではない。先物ポジションはFX市場全体の一部のサンプルである点にも留意。
       状態バッジの閾値はすべて仮置きであり、運用実測に基づき今後調整する。</p>
@@ -136,7 +169,7 @@ footer a{color:var(--accent)}
   <section id="pane-legacy" hidden>
     <p class="tabnote">
       Legacyレポートの<b>非商業（大口投機筋全体）</b>・スプレッド除く。履歴2005年〜。
-      報道の「IMM通貨先物ポジション」に相当する標準数値。全11銘柄対象。
+      報道の「IMM通貨先物ポジション」に相当する標準数値。全12銘柄対象。
     </p>
     <table>
       <thead><tr>
@@ -234,8 +267,55 @@ function alignCell(st){
   return `<td class="state grp"><span class="badge ${klass}">${label}</span>${sub}</td>`;
 }
 
-const ORDER = ["usdjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
+// 銘柄追加時はここへの追記が必須（HANDOFF §8）。symbols.py の SYMBOLS と揃えること。
+const ORDER = ["usdjpy","eurjpy","gbpusd","eurusd","audusd","sp500","nikkei225",
                "nydow","wti","gold","copper","us10y"];
+
+// --- 欠測銘柄の注意表示 ------------------------------------------------
+// eurjpy は在席率約51%で、その週にデータが無いと latest に前週の値が残る。
+// 数値だけでは気づけないため、締め日が対象週とズレていたら機械的に警告する。
+let REPORT_WEEK = null;
+
+function symName(slug, s){
+  // coverage.contiguous=false（穴あき系列）には常設マークを付ける
+  const gappy = s.coverage && s.coverage.contiguous === false;
+  const ratio = s.coverage && s.coverage.present_ratio;
+  const tip = gappy ? `この系列は欠測があります（在席率 ${ratio !== null && ratio !== undefined
+    ? Math.round(ratio*100)+"%" : "—"}／最大 ${s.coverage.max_gap_days}日の欠測）。`
+    + "連続系列として扱わないでください。" : "";
+  return `<span class="thin" title="${tip}">欠測多</span>`.repeat(gappy ? 1 : 0);
+}
+
+function dateCell(rowDate){
+  // 対象週と一致しなければ「前週値」であることを明示する
+  if(REPORT_WEEK && rowDate !== REPORT_WEEK){
+    return `<td class="dt">${rowDate}` +
+           `<span class="stale">⚠ 対象週(${REPORT_WEEK})のデータなし</span></td>`;
+  }
+  return `<td class="dt">${rowDate}</td>`;
+}
+
+function renderStaleAlert(feed){
+  const stale = [];
+  for(const slug of ORDER){
+    const s = feed.symbols[slug]; if(!s || !s.latest) continue;
+    if(s.latest.date !== REPORT_WEEK) stale.push({slug, label:s.label, date:s.latest.date});
+    const t = s.tff;
+    if(t && t.available && t.latest && t.latest.date !== REPORT_WEEK)
+      stale.push({slug, label:s.label + "（TFF）", date:t.latest.date});
+  }
+  const box = document.getElementById("alert-stale");
+  if(!stale.length){ box.hidden = true; return; }
+  box.hidden = false;
+  box.className = "alert";
+  box.innerHTML =
+    `<b>⚠ 対象週（${REPORT_WEEK}）のデータが無い銘柄があります</b>` +
+    `<ul>` + stale.map(x =>
+      `<li><b>${x.label}</b> — 表示中の値は <b>${x.date}</b> 時点のものです` +
+      `（対象週の数値ではありません）</li>`).join("") + `</ul>` +
+    `CFTCは報告者20者未満の銘柄をその週のレポートから除外します（仕様であり不具合ではありません）。` +
+    `<b>この週の数値としてレポートに記載しないでください。</b>`;
+}
 
 function renderLegacy(feed){
   const tb = document.getElementById("rows-legacy");
@@ -245,9 +325,9 @@ function renderLegacy(feed){
     const maxAbs = Math.max(1, ...(s.weeks_52||[]).map(r => Math.abs(r.net)));
     const tr = document.createElement("tr");
     tr.innerHTML =
-      `<td class="sym"><a href="data/csv/${slug}.csv">${s.label}</a>` +
+      `<td class="sym"><a href="data/csv/${slug}.csv">${s.label}</a>${symName(slug, s)}` +
       `<span class="code">${s.cftc_code}</span></td>` +
-      (L ? `<td>${L.date}</td><td>${fmt(L.all)}</td><td>${fmt(L.long)}</td>` +
+      (L ? dateCell(L.date) + `<td>${fmt(L.all)}</td><td>${fmt(L.long)}</td>` +
            `<td class="neg">${fmt(L.short)}</td>` +
            `<td class="${cls(L.net)}">${signed(L.net)}</td>` +
            `<td class="${C ? cls(C.net) : ""}">${C ? signed(C.net) : "—"}</td>` +
@@ -266,6 +346,11 @@ function renderTff(feed){
     const t = s.tff;
     const tr = document.createElement("tr");
     const head = `<td class="sym"><a href="data/csv/${slug}_tff.csv">${s.label}</a>` +
+                 (t && t.coverage && t.coverage.contiguous === false
+                   ? `<span class="thin" title="この系列は欠測があります（在席率 ${
+                       Math.round((t.coverage.present_ratio||0)*100)}%／最大 ${
+                       t.coverage.max_gap_days}日）。連続系列として扱わないでください。">欠測多</span>`
+                   : "") +
                  `<span class="code">${s.cftc_code}</span></td>`;
     if(!t){
       tr.innerHTML = head + `<td colspan="11">TFF対象外（商品先物）</td>`;
@@ -273,8 +358,7 @@ function renderTff(feed){
       tr.innerHTML = head + `<td colspan="11">未取得（バックフィル未実行）</td>`;
     } else {
       const L = t.latest, C = t.change_1w;
-      tr.innerHTML = head +
-        `<td>${L.date}</td>` +
+      tr.innerHTML = head + dateCell(L.date) +
         `<td class="grp">${fmt(L.am_long)}</td><td class="neg">${fmt(L.am_short)}</td>` +
         `<td class="${cls(L.am_net)}">${signed(L.am_net)}</td>` +
         `<td class="${C ? cls(C.am_net) : ""}">${C ? signed(C.am_net) : "—"}</td>` +
@@ -306,6 +390,8 @@ fetch("data/cot-feed.json", {cache: "no-store"})
     document.getElementById("asof").textContent =
       "対象週(火曜締め): " + (feed.meta.report_date_latest || "—") +
       " ／ 生成: " + feed.meta.generated_at;
+    REPORT_WEEK = feed.meta.report_date_latest || null;
+    renderStaleAlert(feed);
     renderLegacy(feed);
     renderTff(feed);
     document.getElementById("status").hidden = true;

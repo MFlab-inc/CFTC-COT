@@ -52,6 +52,20 @@ date,all,long,short,net
 - `symbols.{slug}`: label / cftc_code / sign_convention / coverage /
   latest / prev / change_1w / weeks_52（直近52週の行配列）
 
+`coverage` の各キー（2026-08-09にフィールド追加）:
+
+| キー | 定義 |
+|---|---|
+| first_date / last_date | 保存されている最初と最後の締め日 |
+| weeks | **保存されている行数**（連続週数ではない点に注意） |
+| span_weeks | first_date〜last_date の暦の週数 |
+| present_ratio | weeks ÷ span_weeks。1.0 なら欠測なし |
+| max_gap_days | 隣接する2週の最大間隔（日）。通常7、祝日ずれで6/8 |
+| contiguous | `max_gap_days <= 10` なら true。**false の銘柄を連続系列として扱わないこと**<br>※在席率ではなく**最大の穴**で判定する（1箇所に大穴があっても比率は高く出るため） |
+
+`weeks` と `span_weeks` が食い違うのは、CFTCが報告者20者未満の週を除外するため
+（§12-2 の eurjpy が典型で present_ratio ≈ 0.51）。
+
 ## 4. 符号規則
 
 | 銘柄 | sign_convention | 規則 |
@@ -71,6 +85,7 @@ JAPANESE YEN Code-097741（OI=423,796 / NC Long=107,590 / NC Short=259,715）に
 | slug | 銘柄 | コード | 備考 |
 |---|---|---|---|
 | usdjpy | USD/JPY | 097741 | 日本円先物（符号変換あり） |
+| eurjpy | EUR/JPY | 399741 | ユーロ円クロスレート先物（CME）。**欠測多・§12参照** |
 | gbpusd | GBP/USD | 096742 | 英ポンド先物 |
 | eurusd | EUR/USD | 099741 | ユーロFX先物 |
 | audusd | AUD/USD | 232741 | 豪ドル先物 |
@@ -104,7 +119,7 @@ NYMEX/COMEX/CBOT掲載のため同一ファイル内の該当取引所セクシ�
 
 **目的**: アセットマネジャー（機関投資家等）とレバレッジド・ファンド（ヘッジファンド等）の
 建玉を追加配信する。**TFF（Traders in Financial Futures）は金融先物のみが対象**のため、
-対象は8銘柄（usdjpy/gbpusd/eurusd/audusd/sp500/nikkei225/nydow/us10y）。
+対象は9銘柄（usdjpy/eurjpy/gbpusd/eurusd/audusd/sp500/nikkei225/nydow/us10y）。
 WTI・GOLD・銅は対象外（JSONでは `tff: null`）。
 
 ### 7-1. ソース（検証済み）
@@ -150,14 +165,15 @@ TFF履歴は2006-06-13以降（Legacyの2005年〜より短い）。
 | percentile_all | 現在netの全履歴パーセンタイル（当該値以下の割合×100） |
 | bias | extreme（p≤10 or p≥90）/ biased（p≤25 or p≥75）/ neutral（境界は外側に割当て=保守側） |
 | side | long / short / flat（netの符号） |
-| momentum_4w / momentum_label | netの4週差分と方向ラベル（積み増し/縮小/横ばい） |
+| momentum_4w / momentum_label | netの4週差分と方向ラベル（積み増し/縮小/横ばい）。**暦で4週ちょうどの窓でなければ null**（§12-3） |
+| percentile_all / bias | サンプルが `min_samples_for_bias`(26週) 未満なら **null**（2件で「極端」と出るのを防ぐ） |
 
 ### 8-2. TFF: `symbols.{slug}.tff.state`
 
 | キー | 定義 |
 |---|---|
 | alignment | aligned（AM・LevF符号一致=持続性高）/ divergence_warning（不一致かつLevFが直近8週内にゼロクロス=転換警戒）/ mixed（不一致・直近クロスなし） |
-| levf_zerocross_weeks_ago | LevFの直近ゼロクロスが何週前か（8週超はnull） |
+| levf_zerocross_weeks_ago | LevFの直近ゼロクロスが何週前か（8週超はnull）。**暦の週数**で数え、クロスを挟む2点が2週以上離れて時期を特定できない場合もnull（§12-3） |
 | lev_percentile_all / lev_bias | LevF netの全履歴パーセンタイルと偏り度（スクイーズリスクの目安） |
 
 検証: tests/test_parse.py の test_state（境界値・勢い・整合の全パターン）＋
@@ -237,6 +253,11 @@ CFTC公式FAQの「報告対象トレーダーが20者未満の銘柄はその�
 
 その他の銘柄の日付間隔はすべて7日、または年末年始・独立記念日前後の6日/8日のシフトのみで、
 異常な欠落は無い（sp500 / nydow は 2010-06-15 開始で12件、他は22件のシフト）。
+
+※ この調査は11銘柄時点のもの。**2026-08-09に追加した eurjpy はこの記述の対象外**で、
+在席率51%・最大434日の欠測がある（§12-2）。現在の各銘柄の状態は
+フィードの `coverage.max_gap_days` / `coverage.contiguous` で確認すること
+（nikkei225 も 2005年前半の欠測により contiguous=false）。
 
 ### 10-3. パーサ変更が既存データに影響しないことの確認
 
@@ -361,3 +382,167 @@ exit 0 のままにする** — ここで異常終了するとcommitステップ
 | TFF取得失敗 / TFFマッチ0件 | degraded（commit後にrunを赤く） |
 | 最新データが14日以上古い | degraded（CDNキャッシュ滞留・公表停止の疑い） |
 | 14日以上更新されていない系列がある | degraded（コード廃止・変更の疑い） |
+
+
+---
+
+## 12. EUR/JPY 追加の検証記録（2026-08-09）
+
+### 12-1. 単独銘柄としての実在確認
+
+当初「CFTCにEUR/JPY単独銘柄は存在せず、EUR先物とJPY先物からの合成が必要」と
+判断しかけたが、**これは誤り**だった。CFTC公式の週次ファイルを実際に検索して
+確認した結果（run 31323904219・読み取り専用の調査）:
+
+```
+EURO FX/JAPANESE YEN XRATE - CHICAGO MERCANTILE EXCHANGE   code=399741
+```
+
+- **Legacy（deafut.txt）・TFF（FinFutWk.txt）の両方に存在**する
+- したがって合成値ではなく、**CFTC公式の実データをそのまま配信できる**
+- 同じ仕組みの `EURO FX/BRITISH POUND XRATE` = **299741**（EUR/GBP）も併せて確認。
+  将来の追加候補（未検証・未合意）
+
+同一週の Open Interest が Legacy 側と TFF 側で完全一致することも確認した
+（2026-08-04: いずれも 20,895）。同じ契約を両レポートから読めている裏付けとなる。
+
+### 12-2. 欠測の実測（★利用上の最重要注意）
+
+`eurjpy` は他の11銘柄と**データの性質が根本的に異なる**。
+
+| 指標 | eurjpy | 参考: usdjpy |
+|---|---|---|
+| 期間 | 2017-08-01 〜 2026-08-04 | 2005-01-04 〜 2026-08-04 |
+| 期間内の暦週数 | 471週 | 1,127週 |
+| 実際に存在する週 | **Legacy 238週 / TFF 240週** | 1,127週 |
+| 在席率 | **約51%** | 100% |
+| 最長の連続欠測 | **61週** | 0 |
+| 3週以上の連続欠測 | 13回 | 0 |
+| 直近1年 | 53週中47週（6週欠測） | 欠測なし |
+| Open Interest（2026-08-04） | 20,895 | 419,393 |
+
+建玉がUSD/JPYの約5%しかなく、CFTC公式ルール「報告対象トレーダーが20者未満の週は
+除外」に頻繁に該当するため。**不具合ではなく仕様**だが、以下の帰結がある。
+
+1. **連続系列として扱ってはいけない**。「○週連続」等の期間表現は
+   §6-3 の運用ルール（自前計算・記載しない）に照らしても行わないこと
+2. JSONの `coverage.present_ratio`（0.505）と `coverage.contiguous`（false）で
+   機械的に判定できるようにした。連続系列の銘柄は present_ratio=1.0 / contiguous=true
+3. TFF が Legacy より2週多い（240 vs 238）。2018-01-16 と 2018-02-06 は
+   TFF にあり Legacy に無い。分類体系が異なる別レポートのため起こり得る
+
+### 12-3. 欠測系列に対応するための実装変更
+
+`eurjpy` を追加したことで、既存ロジックに以下の不具合が顕在化したため修正した。
+いずれも**連続系列の11銘柄には影響しない**（state ブロックの全文比較で差分0件を確認）。
+
+| 症状 | 修正 |
+|---|---|
+| `momentum_4w` が「4**件**前」との差分だった。欠測銘柄では暦で20週前などになり、「4週差分」として誤った数値を出す | `momentum_state(nets, dates)` が暦の週数を検査し、欠測をまたぐ場合は **null を返す**（誤った数値を出すより出さない） |
+| `levf_zerocross_weeks_ago` も件数ベースで、暦とずれる | 暦の週数で算出。さらに**クロスを挟む2点が2週以上離れている場合は反転時期を特定できない**ため null（＝`mixed` 扱い）とする |
+| 週次の鮮度チェック（14日）が、長期欠測する銘柄で**毎週DEGRADED＝runが赤**になる | `symbols.py` に `max_stale_days` を追加。eurjpy は 365日（実測最長61週=434日に基づく）。他銘柄は従来どおり14日でコード廃止を2週で検知 |
+
+**オオカミ少年テスト（実測パターンを適用）**:
+
+| 欠測パターン | 赤くなる銘柄 |
+|---|---|
+| 1週欠測 | なし |
+| 3週連続欠測 | eurjpy 以外の11銘柄（＝eurjpyは誤発火しない） |
+| 11週連続欠測 | 同上 |
+| 61週連続欠測（実測最長） | eurjpy も含む全銘柄（1年超の消失は通知されるべき） |
+
+### 12-4. 符号規則（USD/JPY との違い）
+
+`sign_invert=False`。**USD/JPY と扱いが逆になる点に注意**。
+
+| 先物 | 建て方 | ロングの意味 | sign_invert |
+|---|---|---|---|
+| 日本円先物 097741 | 1円 = 何ドル | 円買い ＝ USD/JPY **下落**方向 | True（反転が必要） |
+| ユーロ円クロス 399741 | 1ユーロ = 何円 | ユーロ買い円売り ＝ EUR/JPY **上昇**方向 | False（既にペア方向） |
+
+契約名 `EURO FX/JAPANESE YEN` はFXの慣行どおり「基軸通貨/決済通貨」＝
+JPY per EUR を意味し、CFTC公式ファイル上の表記自体がこの向きを示している。
+したがって `net` プラス＝**投機筋のユーロロング／円ショート優勢**で、
+ペア表記とそのまま同じ向きになる。
+
+**確認状況（2026-08-09）**: 上記は契約の建て方（CME仕様）とCFTCの契約名表記からの
+帰結として導出したもので、当初は未確認扱いとしていた。
+**2026-08-09、リポジトリ所有者により「現在の符号設定で正しい・反転不要」と確認された。**
+以後、`eurjpy` の `sign_invert=False` は確定仕様として扱う（変更時は §4 の
+USD/JPY と同様に慎重に扱うこと）。
+
+※ ただしCFTC公式ビューアブル版との**数値の目視照合そのものは未実施**であり、
+USD/JPY のように「公式値と完全一致」まで確認した銘柄とは検証レベルが異なる。
+数値をレポートに記載する際は §6-1 のとおり公式を確定ソースとすること。
+
+参考として EUR/USD・USD/JPY のネットとの相関を238週で測った結果も残す。
+**これ単体では符号の裏取りにならない**が、向きとしては矛盾しない:
+
+| 対象 | 相関係数 |
+|---|---|
+| EUR/JPY net vs EUR/USD net | +0.138 |
+| EUR/JPY net vs USD/JPY net | +0.018 |
+| EUR/JPY net vs (EUR/USD + USD/JPY) | +0.135 |
+
+符号が逆なら負に出るはずなので向きとしては矛盾しないが、値が小さすぎて
+それ単体では証拠能力がない（参加者層も契約サイズも異なる別市場のため当然）。
+符号の妥当性は上記の所有者確認をもって確定とする。
+
+**2026-08-04 週の出力**（照合用）:
+- Legacy: `all=20895, long=6183, short=-3883, net=+2300`（非商業は小幅ネットロング）
+- TFF: `am_net=-3363`（AMはネットショート）, `lev_net=+578`（LevFはネットロング）
+
+
+---
+
+## 13. 契約名の照合（2026-08-09追加）
+
+### 13-1. 背景
+
+`symbols.py` は各銘柄に `market_hint`（この契約はこういう名前のはず）を持っていたが、
+**どこからも参照されていなかった**。そのため CFTC がコードを別契約に振り替えても
+検知できず、「銘柄ラベルは正しいまま中身だけ別商品になる」という気づきにくい
+壊れ方をし得た。
+
+`backfill.py` が公式ファイル上の契約名を収集し、`=== contract names (official) ===`
+として必ずログに出力するようにした。`market_hint` と一致しない場合は health に
+WARN を出す（表記ゆれで誤検知し得るため run は落とさない）。
+
+### 13-2. 全12銘柄の公式契約名（run 31325767237 で取得）
+
+| slug | code | 公式ファイル上の契約名 |
+|---|---|---|
+| usdjpy | 097741 | JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE |
+| eurjpy | 399741 | EURO FX/JAPANESE YEN XRATE - CHICAGO MERCANTILE EXCHANGE |
+| gbpusd | 096742 | BRITISH POUND - CHICAGO MERCANTILE EXCHANGE |
+| eurusd | 099741 | EURO FX - CHICAGO MERCANTILE EXCHANGE |
+| audusd | 232741 | AUSTRALIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE |
+| sp500 | 13874+ | S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE |
+| nikkei225 | 240743 | NIKKEI STOCK AVERAGE YEN DENOM - CHICAGO MERCANTILE EXCHANGE |
+| nydow | 12460+ | DJIA Consolidated - **CHICAGO BOARD OF TRADE** |
+| wti | 067651 | **WTI-PHYSICAL** - NEW YORK MERCANTILE EXCHANGE |
+| gold | 088691 | GOLD - COMMODITY EXCHANGE INC. |
+| copper | 085692 | COPPER- #1 - COMMODITY EXCHANGE INC. |
+| us10y | 043602 | UST 10Y NOTE - CHICAGO BOARD OF TRADE |
+
+### 13-3. WTI の名称不一致（調査済み・データは正しい）
+
+初回実行で `wti` のみ WARN が出た（hint=`CRUDE OIL` / 実際=`WTI-PHYSICAL`）。
+
+**調査結果: コードの振り替えではなく、CFTC側の表示名変更**。以下の根拠で
+067651 が主要WTI原油先物であることを確認した。
+
+| 締め日 | Open Interest |
+|---|---|
+| 2005-01-04 | 683,120 |
+| 2010-01-05 | 1,231,436 |
+| 2015-01-06 | 1,505,101 |
+| 2020-01-07 | 2,244,930 |
+| 2026-08-04 | 1,886,816 |
+
+建玉188万枚規模かつ2005年から1,127週連続（最大間隔8日＝祝日ずれのみ）であり、
+ニッチな契約ではあり得ない。`market_hint` を実際の名称 `WTI-PHYSICAL` に更新した。
+
+※ 旧称 "CRUDE OIL, LIGHT SWEET" から現行表記への変更時期は未調査（未確認）。
+レポートで銘柄名を書く際は「WTI原油」表記のままで問題ないが、公式ファイルを
+直接参照する場合は現行名が `WTI-PHYSICAL` である点に注意。

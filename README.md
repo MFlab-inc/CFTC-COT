@@ -1,6 +1,6 @@
 # CFTC-COT — 自社CFTC建玉フィード
 
-CFTC公式のCOT（Commitments of Traders）レポートから、対象11銘柄の
+CFTC公式のCOT（Commitments of Traders）レポートから、対象12銘柄の
 **非商業（投機筋）・先物限定・スプレッド除く**ポジションを毎週自動取得し、
 GitHub Pages上で機械可読フィードとして公開するリポジトリです。
 
@@ -16,7 +16,7 @@ GitHub Pages上で機械可読フィードとして公開するリポジトリ�
 | 統合フィード（JSON） | `https://<org>.github.io/CFTC-COT/data/cot-feed.json` |
 | 銘柄別CSV | `https://<org>.github.io/CFTC-COT/data/csv/usdjpy.csv` 等 |
 
-銘柄slug: `usdjpy` `gbpusd` `eurusd` `audusd` `sp500` `nikkei225` `nydow` `wti` `gold` `copper` `us10y`
+銘柄slug: `usdjpy` `eurjpy` `gbpusd` `eurusd` `audusd` `sp500` `nikkei225` `nydow` `wti` `gold` `copper` `us10y`
 
 ## 初回セットアップ手順
 
@@ -49,7 +49,7 @@ COT公表は通常 **米国時間 金曜 15:30 ET**（データは同週火曜�
 - `date` は火曜締め日（YYYY-MM-DD）
 - **USD/JPYのみ符号変換あり**：円先物ショート＝`long`（USD/JPY買い方向）、
   net プラス＝投機筋の円ショート優勢
-- **TFF拡張（v1.1）**：金融8銘柄（商品3銘柄を除く）にアセットマネジャー／
+- **TFF拡張（v1.1）**：金融9銘柄（商品3銘柄を除く）にアセットマネジャー／
   レバレッジド・ファンドの建玉を追加（`data/csv/{slug}_tff.csv`・JSONの`tff`ブロック）。
   週次・バックフィルとも自動取得
 - **状態表示（v1.2）**：偏り度（全履歴パーセンタイル）・勢い（4週差分）・AM×LevF整合状態を
@@ -90,6 +90,10 @@ COT公表は通常 **米国時間 金曜 15:30 ET**（データは同週火曜�
   レポートから除外される（欠測週が生じ得る）。
   実測では `nikkei225` の欠測17週がこれに該当し、**すべて2005年前半に集中**、
   2005-08-02以降は欠測なし（docs/SPEC.md §10-2）
+- **`eurjpy`（EUR/JPY）は欠測が非常に多い**：2017-08-01以降の471週中238週のみ、
+  在席率約51%・最長61週の連続欠測。建玉がUSD/JPYの約5%と薄く20者未満に該当しやすいため。
+  **連続系列として扱わないこと**。JSONの `coverage.present_ratio` / `coverage.contiguous`
+  で判定できる（docs/SPEC.md §12-2）
 
 ## ローカル実行
 
@@ -97,7 +101,7 @@ COT公表は通常 **米国時間 金曜 15:30 ET**（データは同週火曜�
 export PYTHONPATH=scripts
 python scripts/backfill.py --start-year 2005   # 履歴再構築
 python scripts/weekly_update.py                # 最新週の取り込み
-python tests/test_parse.py                     # パーサ・符号規則テスト（全6ブロック）
+python tests/test_parse.py                     # パーサ・符号規則テスト（全10ブロック）
 python -m py_compile scripts/*.py tests/*.py   # 編集後の構文チェック
 ```
 

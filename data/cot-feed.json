@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-08-10 00:57:52 JST",
+  "generated_at": "2026-08-10 02:12:07 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -27,6 +27,7 @@
    ],
    "momentum_weeks": 4,
    "levf_zerocross_weeks": 8,
+   "min_samples_for_bias": 26,
    "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
   },
   "notes": "backfill 2005-2026 from official annual zips",
@@ -41,7 +42,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -442,7 +447,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -738,6 +747,659 @@
     }
    }
   },
+  "eurjpy": {
+   "label": "EUR/JPY",
+   "cftc_code": "399741",
+   "sign_convention": "raw",
+   "note": "CMEユーロ円クロスレート先物（1ユーロ=何円建て）。合成値ではなくCFTC公式の単独銘柄。建玉が小さく報告者20者未満の週は除外されるため欠測が多い（在席率約51%・最長61週連続欠測。coverage.present_ratio 参照）",
+   "coverage": {
+    "first_date": "2017-08-01",
+    "last_date": "2026-08-04",
+    "weeks": 238,
+    "span_weeks": 471,
+    "present_ratio": 0.505,
+    "max_gap_days": 434,
+    "contiguous": false
+   },
+   "latest": {
+    "date": "2026-08-04",
+    "all": 20895,
+    "long": 6183,
+    "short": -3883,
+    "net": 2300
+   },
+   "prev": {
+    "date": "2026-07-28",
+    "all": 21567,
+    "long": 6377,
+    "short": -3791,
+    "net": 2586
+   },
+   "change_1w": {
+    "all": -672,
+    "long": -194,
+    "short": -92,
+    "net": -286
+   },
+   "weeks_52": [
+    {
+     "date": "2025-08-26",
+     "all": 16122,
+     "long": 2732,
+     "short": -3861,
+     "net": -1129
+    },
+    {
+     "date": "2025-09-16",
+     "all": 17226,
+     "long": 3486,
+     "short": -3835,
+     "net": -349
+    },
+    {
+     "date": "2025-09-23",
+     "all": 16836,
+     "long": 4192,
+     "short": -3828,
+     "net": 364
+    },
+    {
+     "date": "2025-10-07",
+     "all": 17620,
+     "long": 4764,
+     "short": -3828,
+     "net": 936
+    },
+    {
+     "date": "2025-10-14",
+     "all": 19273,
+     "long": 6722,
+     "short": -3828,
+     "net": 2894
+    },
+    {
+     "date": "2025-10-21",
+     "all": 19346,
+     "long": 5742,
+     "short": -3890,
+     "net": 1852
+    },
+    {
+     "date": "2025-10-28",
+     "all": 19519,
+     "long": 6365,
+     "short": -3955,
+     "net": 2410
+    },
+    {
+     "date": "2025-11-04",
+     "all": 19093,
+     "long": 5581,
+     "short": -3955,
+     "net": 1626
+    },
+    {
+     "date": "2025-11-10",
+     "all": 19294,
+     "long": 5736,
+     "short": -3955,
+     "net": 1781
+    },
+    {
+     "date": "2025-11-18",
+     "all": 19536,
+     "long": 6301,
+     "short": -3962,
+     "net": 2339
+    },
+    {
+     "date": "2025-11-25",
+     "all": 18014,
+     "long": 5872,
+     "short": -4560,
+     "net": 1312
+    },
+    {
+     "date": "2025-12-02",
+     "all": 18192,
+     "long": 5941,
+     "short": -4588,
+     "net": 1353
+    },
+    {
+     "date": "2025-12-09",
+     "all": 20378,
+     "long": 5995,
+     "short": -4833,
+     "net": 1162
+    },
+    {
+     "date": "2025-12-16",
+     "all": 20048,
+     "long": 6152,
+     "short": -5087,
+     "net": 1065
+    },
+    {
+     "date": "2025-12-23",
+     "all": 17767,
+     "long": 4580,
+     "short": -4492,
+     "net": 88
+    },
+    {
+     "date": "2025-12-30",
+     "all": 17410,
+     "long": 4258,
+     "short": -4044,
+     "net": 214
+    },
+    {
+     "date": "2026-01-06",
+     "all": 17876,
+     "long": 4803,
+     "short": -4445,
+     "net": 358
+    },
+    {
+     "date": "2026-01-13",
+     "all": 17790,
+     "long": 4529,
+     "short": -4044,
+     "net": 485
+    },
+    {
+     "date": "2026-01-20",
+     "all": 18673,
+     "long": 4597,
+     "short": -4664,
+     "net": -67
+    },
+    {
+     "date": "2026-01-27",
+     "all": 19083,
+     "long": 6779,
+     "short": -5085,
+     "net": 1694
+    },
+    {
+     "date": "2026-02-03",
+     "all": 19110,
+     "long": 6226,
+     "short": -5085,
+     "net": 1141
+    },
+    {
+     "date": "2026-02-10",
+     "all": 19419,
+     "long": 6804,
+     "short": -5139,
+     "net": 1665
+    },
+    {
+     "date": "2026-02-17",
+     "all": 19159,
+     "long": 6804,
+     "short": -5049,
+     "net": 1755
+    },
+    {
+     "date": "2026-02-24",
+     "all": 19439,
+     "long": 6677,
+     "short": -5029,
+     "net": 1648
+    },
+    {
+     "date": "2026-03-03",
+     "all": 19654,
+     "long": 6837,
+     "short": -5029,
+     "net": 1808
+    },
+    {
+     "date": "2026-03-10",
+     "all": 21947,
+     "long": 6169,
+     "short": -5058,
+     "net": 1111
+    },
+    {
+     "date": "2026-03-17",
+     "all": 19245,
+     "long": 6373,
+     "short": -5182,
+     "net": 1191
+    },
+    {
+     "date": "2026-03-24",
+     "all": 19230,
+     "long": 6149,
+     "short": -5182,
+     "net": 967
+    },
+    {
+     "date": "2026-03-31",
+     "all": 19394,
+     "long": 5724,
+     "short": -5060,
+     "net": 664
+    },
+    {
+     "date": "2026-04-07",
+     "all": 19745,
+     "long": 5233,
+     "short": -5487,
+     "net": -254
+    },
+    {
+     "date": "2026-04-14",
+     "all": 19941,
+     "long": 5418,
+     "short": -4773,
+     "net": 645
+    },
+    {
+     "date": "2026-04-21",
+     "all": 21152,
+     "long": 5582,
+     "short": -5656,
+     "net": -74
+    },
+    {
+     "date": "2026-04-28",
+     "all": 21371,
+     "long": 5605,
+     "short": -5668,
+     "net": -63
+    },
+    {
+     "date": "2026-05-05",
+     "all": 20946,
+     "long": 5734,
+     "short": -5351,
+     "net": 383
+    },
+    {
+     "date": "2026-05-12",
+     "all": 21331,
+     "long": 5719,
+     "short": -5460,
+     "net": 259
+    },
+    {
+     "date": "2026-05-19",
+     "all": 21163,
+     "long": 5351,
+     "short": -5333,
+     "net": 18
+    },
+    {
+     "date": "2026-05-26",
+     "all": 21443,
+     "long": 5761,
+     "short": -4538,
+     "net": 1223
+    },
+    {
+     "date": "2026-06-02",
+     "all": 21713,
+     "long": 5873,
+     "short": -4537,
+     "net": 1336
+    },
+    {
+     "date": "2026-06-09",
+     "all": 25845,
+     "long": 6076,
+     "short": -4651,
+     "net": 1425
+    },
+    {
+     "date": "2026-06-16",
+     "all": 25086,
+     "long": 6451,
+     "short": -5459,
+     "net": 992
+    },
+    {
+     "date": "2026-06-23",
+     "all": 20036,
+     "long": 6527,
+     "short": -3182,
+     "net": 3345
+    },
+    {
+     "date": "2026-06-30",
+     "all": 19879,
+     "long": 6263,
+     "short": -3182,
+     "net": 3081
+    },
+    {
+     "date": "2026-07-07",
+     "all": 20046,
+     "long": 6470,
+     "short": -3182,
+     "net": 3288
+    },
+    {
+     "date": "2026-07-14",
+     "all": 20915,
+     "long": 6424,
+     "short": -3140,
+     "net": 3284
+    },
+    {
+     "date": "2026-07-21",
+     "all": 21124,
+     "long": 6280,
+     "short": -3660,
+     "net": 2620
+    },
+    {
+     "date": "2026-07-28",
+     "all": 21567,
+     "long": 6377,
+     "short": -3791,
+     "net": 2586
+    },
+    {
+     "date": "2026-08-04",
+     "all": 20895,
+     "long": 6183,
+     "short": -3883,
+     "net": 2300
+    }
+   ],
+   "state": {
+    "percentile_all": 74.4,
+    "bias": "neutral",
+    "side": "long",
+    "momentum_4w": -988,
+    "momentum_label": "ロング縮小"
+   },
+   "tff": {
+    "available": true,
+    "source_report": "Traders in Financial Futures (Futures Only)",
+    "coverage": {
+     "first_date": "2017-08-01",
+     "last_date": "2026-08-04",
+     "weeks": 240,
+     "span_weeks": 471,
+     "present_ratio": 0.51,
+     "max_gap_days": 434,
+     "contiguous": false
+    },
+    "latest": {
+     "date": "2026-08-04",
+     "all": 20895,
+     "am_long": 7758,
+     "am_short": -11121,
+     "am_net": -3363,
+     "lev_long": 1247,
+     "lev_short": -669,
+     "lev_net": 578
+    },
+    "prev": {
+     "date": "2026-07-28",
+     "all": 21567,
+     "am_long": 7912,
+     "am_short": -11532,
+     "am_net": -3620,
+     "lev_long": 1920,
+     "lev_short": -651,
+     "lev_net": 1269
+    },
+    "change_1w": {
+     "am_net": 257,
+     "lev_net": -691
+    },
+    "weeks_52": [
+     {
+      "date": "2025-08-26",
+      "am_net": -7254,
+      "lev_net": 602
+     },
+     {
+      "date": "2025-09-16",
+      "am_net": -6581,
+      "lev_net": 973
+     },
+     {
+      "date": "2025-09-23",
+      "am_net": -6293,
+      "lev_net": 1595
+     },
+     {
+      "date": "2025-10-07",
+      "am_net": -6468,
+      "lev_net": 1706
+     },
+     {
+      "date": "2025-10-14",
+      "am_net": -7577,
+      "lev_net": 3159
+     },
+     {
+      "date": "2025-10-21",
+      "am_net": -8444,
+      "lev_net": 2545
+     },
+     {
+      "date": "2025-10-28",
+      "am_net": -8381,
+      "lev_net": 3451
+     },
+     {
+      "date": "2025-11-04",
+      "am_net": -8298,
+      "lev_net": 2575
+     },
+     {
+      "date": "2025-11-10",
+      "am_net": -9232,
+      "lev_net": 3270
+     },
+     {
+      "date": "2025-11-18",
+      "am_net": -8423,
+      "lev_net": 3269
+     },
+     {
+      "date": "2025-11-25",
+      "am_net": -6477,
+      "lev_net": 1957
+     },
+     {
+      "date": "2025-12-02",
+      "am_net": -5996,
+      "lev_net": 2299
+     },
+     {
+      "date": "2025-12-09",
+      "am_net": -6443,
+      "lev_net": 2081
+     },
+     {
+      "date": "2025-12-16",
+      "am_net": -6460,
+      "lev_net": 1583
+     },
+     {
+      "date": "2025-12-23",
+      "am_net": -6446,
+      "lev_net": 1826
+     },
+     {
+      "date": "2025-12-30",
+      "am_net": -6307,
+      "lev_net": 1365
+     },
+     {
+      "date": "2026-01-06",
+      "am_net": -6353,
+      "lev_net": 1834
+     },
+     {
+      "date": "2026-01-13",
+      "am_net": -6626,
+      "lev_net": 1537
+     },
+     {
+      "date": "2026-01-20",
+      "am_net": -7299,
+      "lev_net": 1395
+     },
+     {
+      "date": "2026-01-27",
+      "am_net": -7421,
+      "lev_net": 2243
+     },
+     {
+      "date": "2026-02-03",
+      "am_net": -7069,
+      "lev_net": 1694
+     },
+     {
+      "date": "2026-02-10",
+      "am_net": -6584,
+      "lev_net": 1669
+     },
+     {
+      "date": "2026-02-17",
+      "am_net": -6904,
+      "lev_net": 2119
+     },
+     {
+      "date": "2026-02-24",
+      "am_net": -6583,
+      "lev_net": 1958
+     },
+     {
+      "date": "2026-03-03",
+      "am_net": -6506,
+      "lev_net": 2105
+     },
+     {
+      "date": "2026-03-10",
+      "am_net": -7727,
+      "lev_net": 2290
+     },
+     {
+      "date": "2026-03-17",
+      "am_net": -7772,
+      "lev_net": 1985
+     },
+     {
+      "date": "2026-03-24",
+      "am_net": -7547,
+      "lev_net": 1954
+     },
+     {
+      "date": "2026-03-31",
+      "am_net": -7448,
+      "lev_net": 1571
+     },
+     {
+      "date": "2026-04-07",
+      "am_net": -7340,
+      "lev_net": 1029
+     },
+     {
+      "date": "2026-04-14",
+      "am_net": -6937,
+      "lev_net": 1498
+     },
+     {
+      "date": "2026-04-21",
+      "am_net": -5990,
+      "lev_net": 612
+     },
+     {
+      "date": "2026-04-28",
+      "am_net": -6443,
+      "lev_net": 530
+     },
+     {
+      "date": "2026-05-05",
+      "am_net": -6145,
+      "lev_net": 351
+     },
+     {
+      "date": "2026-05-12",
+      "am_net": -5734,
+      "lev_net": 115
+     },
+     {
+      "date": "2026-05-19",
+      "am_net": -4539,
+      "lev_net": -502
+     },
+     {
+      "date": "2026-05-26",
+      "am_net": -4183,
+      "lev_net": 394
+     },
+     {
+      "date": "2026-06-02",
+      "am_net": -3778,
+      "lev_net": 223
+     },
+     {
+      "date": "2026-06-09",
+      "am_net": -3404,
+      "lev_net": 112
+     },
+     {
+      "date": "2026-06-16",
+      "am_net": -3974,
+      "lev_net": -370
+     },
+     {
+      "date": "2026-06-23",
+      "am_net": -3920,
+      "lev_net": 1800
+     },
+     {
+      "date": "2026-06-30",
+      "am_net": -3896,
+      "lev_net": 1707
+     },
+     {
+      "date": "2026-07-07",
+      "am_net": -3665,
+      "lev_net": 1696
+     },
+     {
+      "date": "2026-07-14",
+      "am_net": -3140,
+      "lev_net": 1271
+     },
+     {
+      "date": "2026-07-21",
+      "am_net": -3290,
+      "lev_net": 1209
+     },
+     {
+      "date": "2026-07-28",
+      "am_net": -3620,
+      "lev_net": 1269
+     },
+     {
+      "date": "2026-08-04",
+      "am_net": -3363,
+      "lev_net": 578
+     }
+    ],
+    "state": {
+     "alignment": "divergence_warning",
+     "levf_zerocross_weeks_ago": 6,
+     "lev_percentile_all": 34.6,
+     "lev_bias": "neutral"
+    }
+   }
+  },
   "gbpusd": {
    "label": "GBP/USD",
    "cftc_code": "096742",
@@ -746,7 +1408,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -1147,7 +1813,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -1451,7 +2121,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -1852,7 +2526,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -2156,7 +2834,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -2557,7 +3239,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -2861,7 +3547,11 @@
    "coverage": {
     "first_date": "2010-06-15",
     "last_date": "2026-08-04",
-    "weeks": 843
+    "weeks": 843,
+    "span_weeks": 843,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -3262,7 +3952,11 @@
     "coverage": {
      "first_date": "2010-06-15",
      "last_date": "2026-08-04",
-     "weeks": 843
+     "weeks": 843,
+     "span_weeks": 843,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -3566,7 +4260,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1110
+    "weeks": 1110,
+    "span_weeks": 1127,
+    "present_ratio": 0.985,
+    "max_gap_days": 63,
+    "contiguous": false
    },
    "latest": {
     "date": "2026-08-04",
@@ -3967,7 +4665,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -4271,7 +4973,11 @@
    "coverage": {
     "first_date": "2010-06-15",
     "last_date": "2026-08-04",
-    "weeks": 843
+    "weeks": 843,
+    "span_weeks": 843,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -4672,7 +5378,11 @@
     "coverage": {
      "first_date": "2010-06-15",
      "last_date": "2026-08-04",
-     "weeks": 843
+     "weeks": 843,
+     "span_weeks": 843,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
@@ -4976,7 +5686,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -5381,7 +6095,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -5786,7 +6504,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -6191,7 +6913,11 @@
    "coverage": {
     "first_date": "2005-01-04",
     "last_date": "2026-08-04",
-    "weeks": 1127
+    "weeks": 1127,
+    "span_weeks": 1127,
+    "present_ratio": 1.0,
+    "max_gap_days": 8,
+    "contiguous": true
    },
    "latest": {
     "date": "2026-08-04",
@@ -6592,7 +7318,11 @@
     "coverage": {
      "first_date": "2006-06-13",
      "last_date": "2026-08-04",
-     "weeks": 1052
+     "weeks": 1052,
+     "span_weeks": 1052,
+     "present_ratio": 1.0,
+     "max_gap_days": 8,
+     "contiguous": true
     },
     "latest": {
      "date": "2026-08-04",
