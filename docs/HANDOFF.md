@@ -173,6 +173,7 @@ TFF側（`am_*` / `lev_*`）も**同一の符号規則**を適用する（`to_tf
 
 つまり `eurjpy` は **net プラス＝投機筋のユーロロング／円ショート優勢**で、
 ペア表記とそのまま同じ向きになる。ここを反転させると符号が逆になるので触らないこと。
+**2026-08-09に所有者により「現在の符号設定で正しい・反転不要」と確認済み**（SPEC §12-4）。
 `tests/test_parse.py::test_symbols_and_dashboard_in_sync` が
 「sign_invert=True は usdjpy のみ」を機械的に固定している。
 
@@ -452,6 +453,8 @@ ZIP取得は `fetch_zip_text()` が `timeout=300, retries=3, backoff=8` で呼�
 | 2026-08-09 | eurjpy の欠測を実測（在席率51%・最大434日）。状態計算を暦ベースに修正（SPEC §12-2/12-3） |
 | 2026-08-09 | 多視点レビューで自作コードの欠陥10件を検出・修正。**テストがCIで未実行だった問題**も是正 |
 | 2026-08-09 | `market_hint` が未使用だったため、契約名の照合をbackfillのhealthに追加 |
+| 2026-08-09 | 照合初回で wti の名称不一致を検出→**データは正常**（建玉189万枚で主要WTI契約と確認）、hintを実名に更新（SPEC §13-3） |
+| 2026-08-09 | **eurjpy の符号規則を所有者が確認・確定**（sign_invert=False で正しい） |
 
 現在のテスト構成（`tests/test_parse.py`・**全10ブロック合格が正常**）:
 `main()`（Legacy符号規則）/ `test_tff()` / `test_state()` / `test_tff_legacy_bulk_format()` /
