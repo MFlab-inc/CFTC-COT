@@ -2,7 +2,7 @@
  "meta": {
   "schema_version": "1.2",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-08-22 10:56:05 JST",
+  "generated_at": "2026-08-29 16:13:27 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -31,7 +31,7 @@
    "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
   },
   "notes": "weekly update from https://www.cftc.gov/dea/newcot/deafut.txt",
-  "report_date_latest": "2026-08-18"
+  "report_date_latest": "2026-08-25"
  },
  "symbols": {
   "usdjpy": {
@@ -41,41 +41,34 @@
    "note": "円先物を USD/JPY 方向に符号変換。net プラス = 投機筋の円ショート優勢",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 384216,
+    "long": 191638,
+    "short": -128340,
+    "net": 63298
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 380811,
     "long": 181825,
     "short": -128932,
     "net": 52893
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 391874,
-    "long": 176273,
-    "short": -134188,
-    "net": 42085
-   },
    "change_1w": {
-    "all": -11063,
-    "long": 5552,
-    "short": 5256,
-    "net": 10808
+    "all": 3405,
+    "long": 9813,
+    "short": 592,
+    "net": 10405
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 357366,
-     "long": 86281,
-     "short": -170765,
-     "net": -84484
-    },
     {
      "date": "2025-09-02",
      "all": 414249,
@@ -432,13 +425,20 @@
      "long": 181825,
      "short": -128932,
      "net": 52893
+    },
+    {
+     "date": "2026-08-25",
+     "all": 384216,
+     "long": 191638,
+     "short": -128340,
+     "net": 63298
     }
    ],
    "state": {
-    "percentile_all": 58.5,
+    "percentile_all": 67.3,
     "bias": "neutral",
     "side": "long",
-    "momentum_4w": -99232,
+    "momentum_4w": -100114,
     "momentum_label": "ロング縮小"
    },
    "tff": {
@@ -446,14 +446,24 @@
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 384216,
+     "am_long": 91537,
+     "am_short": -71421,
+     "am_net": 20116,
+     "lev_long": 143570,
+     "lev_short": -66528,
+     "lev_net": 77042
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 380811,
      "am_long": 97572,
@@ -463,26 +473,11 @@
      "lev_short": -67776,
      "lev_net": 67971
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 391874,
-     "am_long": 98498,
-     "am_short": -72247,
-     "am_net": 26251,
-     "lev_long": 128043,
-     "lev_short": -74973,
-     "lev_net": 53070
-    },
     "change_1w": {
-     "am_net": -508,
-     "lev_net": 14901
+     "am_net": -5627,
+     "lev_net": 9071
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": -75185,
-      "lev_net": 41388
-     },
      {
       "date": "2025-09-02",
       "am_net": -75981,
@@ -737,12 +732,17 @@
       "date": "2026-08-18",
       "am_net": 25743,
       "lev_net": 67971
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 20116,
+      "lev_net": 77042
      }
     ],
     "state": {
      "alignment": "aligned",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 82.6,
+     "lev_percentile_all": 87.3,
      "lev_bias": "biased"
     }
    }
@@ -754,41 +754,34 @@
    "note": "CMEユーロ円クロスレート先物（1ユーロ=何円建て）。合成値ではなくCFTC公式の単独銘柄。建玉が小さく報告者20者未満の週は除外されるため欠測が多い（在席率約51%・最長61週連続欠測。coverage.present_ratio 参照）",
    "coverage": {
     "first_date": "2017-08-01",
-    "last_date": "2026-08-18",
-    "weeks": 240,
-    "span_weeks": 473,
-    "present_ratio": 0.507,
+    "last_date": "2026-08-25",
+    "weeks": 241,
+    "span_weeks": 474,
+    "present_ratio": 0.508,
     "max_gap_days": 434,
     "contiguous": false
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 22261,
+    "long": 6669,
+    "short": -4794,
+    "net": 1875
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 21477,
     "long": 6450,
     "short": -3794,
     "net": 2656
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 21455,
-    "long": 6445,
-    "short": -3705,
-    "net": 2740
-   },
    "change_1w": {
-    "all": 22,
-    "long": 5,
-    "short": -89,
-    "net": -84
+    "all": 784,
+    "long": 219,
+    "short": -1000,
+    "net": -781
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 16122,
-     "long": 2732,
-     "short": -3861,
-     "net": -1129
-    },
     {
      "date": "2025-09-16",
      "all": 17226,
@@ -1124,28 +1117,45 @@
      "long": 6450,
      "short": -3794,
      "net": 2656
+    },
+    {
+     "date": "2026-08-25",
+     "all": 22261,
+     "long": 6669,
+     "short": -4794,
+     "net": 1875
     }
    ],
    "state": {
-    "percentile_all": 76.7,
-    "bias": "biased",
+    "percentile_all": 69.3,
+    "bias": "neutral",
     "side": "long",
-    "momentum_4w": 36,
-    "momentum_label": "ロング積み増し"
+    "momentum_4w": -711,
+    "momentum_label": "ロング縮小"
    },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2017-08-01",
-     "last_date": "2026-08-18",
-     "weeks": 242,
-     "span_weeks": 473,
-     "present_ratio": 0.512,
+     "last_date": "2026-08-25",
+     "weeks": 243,
+     "span_weeks": 474,
+     "present_ratio": 0.513,
      "max_gap_days": 434,
      "contiguous": false
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 22261,
+     "am_long": 9281,
+     "am_short": -10846,
+     "am_net": -1565,
+     "lev_long": 1371,
+     "lev_short": -1630,
+     "lev_net": -259
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 21477,
      "am_long": 9014,
@@ -1155,26 +1165,11 @@
      "lev_short": -630,
      "lev_net": 324
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 21455,
-     "am_long": 8875,
-     "am_short": -11129,
-     "am_net": -2254,
-     "lev_long": 1103,
-     "lev_short": -521,
-     "lev_net": 582
-    },
     "change_1w": {
-     "am_net": 196,
-     "lev_net": -258
+     "am_net": 493,
+     "lev_net": -583
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": -7254,
-      "lev_net": 602
-     },
      {
       "date": "2025-09-16",
       "am_net": -6581,
@@ -1414,12 +1409,17 @@
       "date": "2026-08-18",
       "am_net": -2058,
       "lev_net": 324
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": -1565,
+      "lev_net": -259
      }
     ],
     "state": {
-     "alignment": "mixed",
-     "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 31.4,
+     "alignment": "aligned",
+     "levf_zerocross_weeks_ago": 0,
+     "lev_percentile_all": 25.5,
      "lev_bias": "neutral"
     }
    }
@@ -1431,41 +1431,34 @@
    "note": "",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 318468,
+    "long": 93612,
+    "short": -138136,
+    "net": -44524
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 286371,
     "long": 77343,
     "short": -131916,
     "net": -54573
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 256447,
-    "long": 65268,
-    "short": -121489,
-    "net": -56221
-   },
    "change_1w": {
-    "all": 29924,
-    "long": 12075,
-    "short": -10427,
-    "net": 1648
+    "all": 32097,
+    "long": 16269,
+    "short": -6220,
+    "net": 10049
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 219906,
-     "long": 76001,
-     "short": -107354,
-     "net": -31353
-    },
     {
      "date": "2025-09-02",
      "all": 226437,
@@ -1822,13 +1815,20 @@
      "long": 77343,
      "short": -131916,
      "net": -54573
+    },
+    {
+     "date": "2026-08-25",
+     "all": 318468,
+     "long": 93612,
+     "short": -138136,
+     "net": -44524
     }
    ],
    "state": {
-    "percentile_all": 13.9,
+    "percentile_all": 19.5,
     "bias": "biased",
     "side": "short",
-    "momentum_4w": 988,
+    "momentum_4w": 20290,
     "momentum_label": "ショート縮小"
    },
    "tff": {
@@ -1836,14 +1836,24 @@
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 318468,
+     "am_long": 45799,
+     "am_short": -150290,
+     "am_net": -104491,
+     "lev_long": 81286,
+     "lev_short": -33377,
+     "lev_net": 47909
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 286371,
      "am_long": 33516,
@@ -1853,26 +1863,11 @@
      "lev_short": -27944,
      "lev_net": 42877
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 256447,
-     "am_long": 22690,
-     "am_short": -142553,
-     "am_net": -119863,
-     "lev_long": 67627,
-     "lev_short": -26957,
-     "lev_net": 40670
-    },
     "change_1w": {
-     "am_net": 2623,
-     "lev_net": 2207
+     "am_net": 12749,
+     "lev_net": 5032
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": -74738,
-      "lev_net": 23654
-     },
      {
       "date": "2025-09-02",
       "am_net": -81390,
@@ -2127,12 +2122,17 @@
       "date": "2026-08-18",
       "am_net": -117240,
       "lev_net": 42877
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": -104491,
+      "lev_net": 47909
      }
     ],
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 81.6,
+     "lev_percentile_all": 84.7,
      "lev_bias": "biased"
     }
    }
@@ -2144,41 +2144,34 @@
    "note": "",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 818524,
+    "long": 198919,
+    "short": -235271,
+    "net": -36352
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 804940,
     "long": 196241,
     "short": -255329,
     "net": -59088
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 801884,
-    "long": 197186,
-    "short": -257196,
-    "net": -60010
-   },
    "change_1w": {
-    "all": 3056,
-    "long": -945,
-    "short": 1867,
-    "net": 922
+    "all": 13584,
+    "long": 2678,
+    "short": 20058,
+    "net": 22736
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 842215,
-     "long": 258386,
-     "short": -135347,
-     "net": 123039
-    },
     {
      "date": "2025-09-02",
      "all": 845820,
@@ -2535,28 +2528,45 @@
      "long": 196241,
      "short": -255329,
      "net": -59088
+    },
+    {
+     "date": "2026-08-25",
+     "all": 818524,
+     "long": 198919,
+     "short": -235271,
+     "net": -36352
     }
    ],
    "state": {
-    "percentile_all": 22.3,
-    "bias": "biased",
+    "percentile_all": 29.9,
+    "bias": "neutral",
     "side": "short",
-    "momentum_4w": -17750,
-    "momentum_label": "ショート積み増し"
+    "momentum_4w": 36095,
+    "momentum_label": "ショート縮小"
    },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 818524,
+     "am_long": 461805,
+     "am_short": -200379,
+     "am_net": 261426,
+     "lev_long": 90921,
+     "lev_short": -129280,
+     "lev_net": -38359
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 804940,
      "am_long": 451575,
@@ -2566,26 +2576,11 @@
      "lev_short": -147856,
      "lev_net": -57716
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 801884,
-     "am_long": 450831,
-     "am_short": -225442,
-     "am_net": 225389,
-     "lev_long": 86753,
-     "lev_short": -147353,
-     "lev_net": -60600
-    },
     "change_1w": {
-     "am_net": 12037,
-     "lev_net": 2884
+     "am_net": 24000,
+     "lev_net": 19357
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": 376814,
-      "lev_net": 34207
-     },
      {
       "date": "2025-09-02",
       "am_net": 379800,
@@ -2840,12 +2835,17 @@
       "date": "2026-08-18",
       "am_net": 237426,
       "lev_net": -57716
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 261426,
+      "lev_net": -38359
      }
     ],
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 27.1,
+     "lev_percentile_all": 34.9,
      "lev_bias": "neutral"
     }
    }
@@ -2857,41 +2857,34 @@
    "note": "",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 333906,
+    "long": 106864,
+    "short": -151319,
+    "net": -44455
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 288526,
     "long": 88204,
     "short": -132363,
     "net": -44159
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 267222,
-    "long": 80538,
-    "short": -119761,
-    "net": -39223
-   },
    "change_1w": {
-    "all": 21304,
-    "long": 7666,
-    "short": -12602,
-    "net": -4936
+    "all": 45380,
+    "long": 18660,
+    "short": -18956,
+    "net": -296
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 191207,
-     "long": 28700,
-     "short": -129290,
-     "net": -100590
-    },
     {
      "date": "2025-09-02",
      "all": 185048,
@@ -3248,13 +3241,20 @@
      "long": 88204,
      "short": -132363,
      "net": -44159
+    },
+    {
+     "date": "2026-08-25",
+     "all": 333906,
+     "long": 106864,
+     "short": -151319,
+     "net": -44455
     }
    ],
    "state": {
-    "percentile_all": 23.7,
+    "percentile_all": 23.5,
     "bias": "biased",
     "side": "short",
-    "momentum_4w": -6474,
+    "momentum_4w": -4491,
     "momentum_label": "ショート積み増し"
    },
    "tff": {
@@ -3262,14 +3262,24 @@
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 333906,
+     "am_long": 97445,
+     "am_short": -142872,
+     "am_net": -45427,
+     "lev_long": 81344,
+     "lev_short": -27283,
+     "lev_net": 54061
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 288526,
      "am_long": 78264,
@@ -3279,26 +3289,11 @@
      "lev_short": -23536,
      "lev_net": 52108
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 267222,
-     "am_long": 74059,
-     "am_short": -116738,
-     "am_net": -42679,
-     "lev_long": 72166,
-     "lev_short": -23625,
-     "lev_net": 48541
-    },
     "change_1w": {
-     "am_net": -5387,
-     "lev_net": 3567
+     "am_net": 2639,
+     "lev_net": 1953
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": -79151,
-      "lev_net": -4483
-     },
      {
       "date": "2025-09-02",
       "am_net": -66140,
@@ -3553,12 +3548,17 @@
       "date": "2026-08-18",
       "am_net": -48066,
       "lev_net": 52108
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": -45427,
+      "lev_net": 54061
      }
     ],
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 84.2,
+     "lev_percentile_all": 85.9,
      "lev_bias": "biased"
     }
    }
@@ -3570,41 +3570,34 @@
    "note": "Consolidated（大型+E-mini+Micro合算）。導入前の週は欠測になる",
    "coverage": {
     "first_date": "2010-06-15",
-    "last_date": "2026-08-18",
-    "weeks": 845,
-    "span_weeks": 845,
+    "last_date": "2026-08-25",
+    "weeks": 846,
+    "span_weeks": 846,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 2074931,
+    "long": 229741,
+    "short": -307916,
+    "net": -78175
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 2099170,
     "long": 270678,
     "short": -286414,
     "net": -15736
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 2146778,
-    "long": 282930,
-    "short": -275497,
-    "net": 7433
-   },
    "change_1w": {
-    "all": -47608,
-    "long": -12252,
-    "short": -10917,
-    "net": -23169
+    "all": -24239,
+    "long": -40937,
+    "short": -21502,
+    "net": -62439
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 2043484,
-     "long": 224647,
-     "short": -414391,
-     "net": -189744
-    },
     {
      "date": "2025-09-02",
      "all": 2022728,
@@ -3961,28 +3954,45 @@
      "long": 270678,
      "short": -286414,
      "net": -15736
+    },
+    {
+     "date": "2026-08-25",
+     "all": 2074931,
+     "long": 229741,
+     "short": -307916,
+     "net": -78175
     }
    ],
    "state": {
-    "percentile_all": 37.9,
-    "bias": "neutral",
+    "percentile_all": 12.4,
+    "bias": "biased",
     "side": "short",
-    "momentum_4w": 5262,
-    "momentum_label": "ショート縮小"
+    "momentum_4w": -59090,
+    "momentum_label": "ショート積み増し"
    },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2010-06-15",
-     "last_date": "2026-08-18",
-     "weeks": 845,
-     "span_weeks": 845,
+     "last_date": "2026-08-25",
+     "weeks": 846,
+     "span_weeks": 846,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 2074931,
+     "am_long": 1168355,
+     "am_short": -213379,
+     "am_net": 954976,
+     "lev_long": 138765,
+     "lev_short": -467297,
+     "lev_net": -328532
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 2099170,
      "am_long": 1167721,
@@ -3992,26 +4002,11 @@
      "lev_short": -451601,
      "lev_net": -289435
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 2146778,
-     "am_long": 1156714,
-     "am_short": -206446,
-     "am_net": 950268,
-     "lev_long": 197380,
-     "lev_short": -483885,
-     "lev_net": -286505
-    },
     "change_1w": {
-     "am_net": 12435,
-     "lev_net": -2930
+     "am_net": -7727,
+     "lev_net": -39097
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": 872811,
-      "lev_net": -425588
-     },
      {
       "date": "2025-09-02",
       "am_net": 862129,
@@ -4266,12 +4261,17 @@
       "date": "2026-08-18",
       "am_net": 962703,
       "lev_net": -289435
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 954976,
+      "lev_net": -328532
      }
     ],
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 15.3,
+     "lev_percentile_all": 11.7,
      "lev_bias": "biased"
     }
    }
@@ -4283,41 +4283,34 @@
    "note": "円建て日経平均先物（CME）",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1112,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1113,
+    "span_weeks": 1130,
     "present_ratio": 0.985,
     "max_gap_days": 63,
     "contiguous": false
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 31113,
+    "long": 6624,
+    "short": -3330,
+    "net": 3294
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 31049,
     "long": 6003,
     "short": -3480,
     "net": 2523
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 28863,
-    "long": 5021,
-    "short": -3648,
-    "net": 1373
-   },
    "change_1w": {
-    "all": 2186,
-    "long": 982,
-    "short": 168,
-    "net": 1150
+    "all": 64,
+    "long": 621,
+    "short": 150,
+    "net": 771
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 36136,
-     "long": 9488,
-     "short": -4582,
-     "net": 4906
-    },
     {
      "date": "2025-09-02",
      "all": 37168,
@@ -4674,13 +4667,20 @@
      "long": 6003,
      "short": -3480,
      "net": 2523
+    },
+    {
+     "date": "2026-08-25",
+     "all": 31113,
+     "long": 6624,
+     "short": -3330,
+     "net": 3294
     }
    ],
    "state": {
-    "percentile_all": 22.8,
-    "bias": "biased",
+    "percentile_all": 25.1,
+    "bias": "neutral",
     "side": "long",
-    "momentum_4w": -1439,
+    "momentum_4w": -2928,
     "momentum_label": "ロング縮小"
    },
    "tff": {
@@ -4688,14 +4688,24 @@
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 31113,
+     "am_long": 7563,
+     "am_short": -299,
+     "am_net": 7264,
+     "lev_long": 4813,
+     "lev_short": -3872,
+     "lev_net": 941
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 31049,
      "am_long": 7516,
@@ -4705,26 +4715,11 @@
      "lev_short": -5544,
      "lev_net": -437
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 28863,
-     "am_long": 7585,
-     "am_short": -1034,
-     "am_net": 6551,
-     "lev_long": 3882,
-     "lev_short": -2861,
-     "lev_net": 1021
-    },
     "change_1w": {
-     "am_net": 517,
-     "lev_net": -1458
+     "am_net": 196,
+     "lev_net": 1378
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": 4299,
-      "lev_net": 4629
-     },
      {
       "date": "2025-09-02",
       "am_net": 3818,
@@ -4979,12 +4974,17 @@
       "date": "2026-08-18",
       "am_net": 7068,
       "lev_net": -437
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 7264,
+      "lev_net": 941
      }
     ],
     "state": {
-     "alignment": "divergence_warning",
+     "alignment": "aligned",
      "levf_zerocross_weeks_ago": 0,
-     "lev_percentile_all": 17.3,
+     "lev_percentile_all": 23.0,
      "lev_bias": "biased"
     }
    }
@@ -4996,41 +4996,34 @@
    "note": "Consolidated。導入前の週は欠測になる",
    "coverage": {
     "first_date": "2010-06-15",
-    "last_date": "2026-08-18",
-    "weeks": 845,
-    "span_weeks": 845,
+    "last_date": "2026-08-25",
+    "weeks": 846,
+    "span_weeks": 846,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 88454,
+    "long": 25680,
+    "short": -10123,
+    "net": 15557
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 94439,
     "long": 27244,
     "short": -7624,
     "net": 19620
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 89844,
-    "long": 27413,
-    "short": -8938,
-    "net": 18475
-   },
    "change_1w": {
-    "all": 4595,
-    "long": -169,
-    "short": 1314,
-    "net": 1145
+    "all": -5985,
+    "long": -1564,
+    "short": -2499,
+    "net": -4063
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 86477,
-     "long": 10807,
-     "short": -13655,
-     "net": -2848
-    },
     {
      "date": "2025-09-02",
      "all": 84001,
@@ -5387,28 +5380,45 @@
      "long": 27244,
      "short": -7624,
      "net": 19620
+    },
+    {
+     "date": "2026-08-25",
+     "all": 88454,
+     "long": 25680,
+     "short": -10123,
+     "net": 15557
     }
    ],
    "state": {
-    "percentile_all": 85.1,
+    "percentile_all": 77.3,
     "bias": "biased",
     "side": "long",
-    "momentum_4w": 5693,
-    "momentum_label": "ロング積み増し"
+    "momentum_4w": -4006,
+    "momentum_label": "ロング縮小"
    },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2010-06-15",
-     "last_date": "2026-08-18",
-     "weeks": 845,
-     "span_weeks": 845,
+     "last_date": "2026-08-25",
+     "weeks": 846,
+     "span_weeks": 846,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 88454,
+     "am_long": 16835,
+     "am_short": -11323,
+     "am_net": 5512,
+     "lev_long": 9874,
+     "lev_short": -11509,
+     "lev_net": -1635
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 94439,
      "am_long": 14879,
@@ -5418,26 +5428,11 @@
      "lev_short": -10191,
      "lev_net": 3737
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 89844,
-     "am_long": 16798,
-     "am_short": -8769,
-     "am_net": 8029,
-     "lev_long": 11145,
-     "lev_short": -12352,
-     "lev_net": -1207
-    },
     "change_1w": {
-     "am_net": -5568,
-     "lev_net": 4944
+     "am_net": 3051,
+     "lev_net": -5372
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": 5252,
-      "lev_net": -7987
-     },
      {
       "date": "2025-09-02",
       "am_net": 2763,
@@ -5692,13 +5687,18 @@
       "date": "2026-08-18",
       "am_net": 2461,
       "lev_net": 3737
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 5512,
+      "lev_net": -1635
      }
     ],
     "state": {
-     "alignment": "aligned",
+     "alignment": "divergence_warning",
      "levf_zerocross_weeks_ago": 0,
-     "lev_percentile_all": 40.2,
-     "lev_bias": "neutral"
+     "lev_percentile_all": 16.4,
+     "lev_bias": "biased"
     }
    }
   },
@@ -5709,41 +5709,34 @@
    "note": "NYMEX WTI原油先物。公式表記は WTI-PHYSICAL（旧 Light Sweet Crude Oil）",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 1906740,
+    "long": 323243,
+    "short": -199794,
+    "net": 123449
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 1888960,
     "long": 320159,
     "short": -198069,
     "net": 122090
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 1892429,
-    "long": 314846,
-    "short": -215650,
-    "net": 99196
-   },
    "change_1w": {
-    "all": -3469,
-    "long": 5313,
-    "short": 17581,
-    "net": 22894
+    "all": 17780,
+    "long": 3084,
+    "short": -1725,
+    "net": 1359
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 1912554,
-     "long": 300389,
-     "short": -190917,
-     "net": 109472
-    },
     {
      "date": "2025-09-02",
      "all": 1987861,
@@ -6100,13 +6093,20 @@
      "long": 320159,
      "short": -198069,
      "net": 122090
+    },
+    {
+     "date": "2026-08-25",
+     "all": 1906740,
+     "long": 323243,
+     "short": -199794,
+     "net": 123449
     }
    ],
    "state": {
     "percentile_all": 29.7,
     "bias": "neutral",
     "side": "long",
-    "momentum_4w": 40401,
+    "momentum_4w": 3341,
     "momentum_label": "ロング積み増し"
    },
    "tff": null
@@ -6118,41 +6118,34 @@
    "note": "COMEX金先物",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 427957,
+    "long": 277159,
+    "short": -33825,
+    "net": 243334
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 406260,
     "long": 256902,
     "short": -34713,
     "net": 222189
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 400309,
-    "long": 250936,
-    "short": -32996,
-    "net": 217940
-   },
    "change_1w": {
-    "all": 5951,
-    "long": 5966,
-    "short": -1717,
-    "net": 4249
+    "all": 21697,
+    "long": 20257,
+    "short": 888,
+    "net": 21145
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 443760,
-     "long": 275767,
-     "short": -61456,
-     "net": 214311
-    },
     {
      "date": "2025-09-02",
      "all": 492908,
@@ -6509,13 +6502,20 @@
      "long": 256902,
      "short": -34713,
      "net": 222189
+    },
+    {
+     "date": "2026-08-25",
+     "all": 427957,
+     "long": 277159,
+     "short": -33825,
+     "net": 243334
     }
    ],
    "state": {
-    "percentile_all": 79.7,
+    "percentile_all": 86.2,
     "bias": "biased",
     "side": "long",
-    "momentum_4w": 38279,
+    "momentum_4w": 61264,
     "momentum_label": "ロング積み増し"
    },
    "tff": null
@@ -6527,41 +6527,34 @@
    "note": "COMEX銅先物",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 283299,
+    "long": 121419,
+    "short": -36153,
+    "net": 85266
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 281563,
     "long": 111399,
     "short": -31651,
     "net": 79748
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 297047,
-    "long": 114462,
-    "short": -34074,
-    "net": 80388
-   },
    "change_1w": {
-    "all": -15484,
-    "long": -3063,
-    "short": 2423,
-    "net": -640
+    "all": 1736,
+    "long": 10020,
+    "short": -4502,
+    "net": 5518
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 190049,
-     "long": 56762,
-     "short": -30532,
-     "net": 26230
-    },
     {
      "date": "2025-09-02",
      "all": 195673,
@@ -6918,13 +6911,20 @@
      "long": 111399,
      "short": -31651,
      "net": 79748
+    },
+    {
+     "date": "2026-08-25",
+     "all": 283299,
+     "long": 121419,
+     "short": -36153,
+     "net": 85266
     }
    ],
    "state": {
-    "percentile_all": 99.7,
+    "percentile_all": 100.0,
     "bias": "extreme",
     "side": "long",
-    "momentum_4w": 5771,
+    "momentum_4w": 17985,
     "momentum_label": "ロング積み増し"
    },
    "tff": null
@@ -6936,41 +6936,34 @@
    "note": "CBOT米10年国債先物",
    "coverage": {
     "first_date": "2005-01-04",
-    "last_date": "2026-08-18",
-    "weeks": 1129,
-    "span_weeks": 1129,
+    "last_date": "2026-08-25",
+    "weeks": 1130,
+    "span_weeks": 1130,
     "present_ratio": 1.0,
     "max_gap_days": 8,
     "contiguous": true
    },
    "latest": {
+    "date": "2026-08-25",
+    "all": 6208739,
+    "long": 514737,
+    "short": -1353712,
+    "net": -838975
+   },
+   "prev": {
     "date": "2026-08-18",
     "all": 5596739,
     "long": 536297,
     "short": -1483258,
     "net": -946961
    },
-   "prev": {
-    "date": "2026-08-11",
-    "all": 5458890,
-    "long": 499227,
-    "short": -1414280,
-    "net": -915053
-   },
    "change_1w": {
-    "all": 137849,
-    "long": 37070,
-    "short": -68978,
-    "net": -31908
+    "all": 612000,
+    "long": -21560,
+    "short": 129546,
+    "net": 107986
    },
    "weeks_52": [
-    {
-     "date": "2025-08-26",
-     "all": 5640455,
-     "long": 508552,
-     "short": -1392381,
-     "net": -883829
-    },
     {
      "date": "2025-09-02",
      "all": 5209519,
@@ -7327,28 +7320,45 @@
      "long": 536297,
      "short": -1483258,
      "net": -946961
+    },
+    {
+     "date": "2026-08-25",
+     "all": 6208739,
+     "long": 514737,
+     "short": -1353712,
+     "net": -838975
     }
    ],
    "state": {
-    "percentile_all": 1.1,
+    "percentile_all": 4.8,
     "bias": "extreme",
     "side": "short",
-    "momentum_4w": -67255,
-    "momentum_label": "ショート積み増し"
+    "momentum_4w": 37144,
+    "momentum_label": "ショート縮小"
    },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
     "coverage": {
      "first_date": "2006-06-13",
-     "last_date": "2026-08-18",
-     "weeks": 1054,
-     "span_weeks": 1054,
+     "last_date": "2026-08-25",
+     "weeks": 1055,
+     "span_weeks": 1055,
      "present_ratio": 1.0,
      "max_gap_days": 8,
      "contiguous": true
     },
     "latest": {
+     "date": "2026-08-25",
+     "all": 6208739,
+     "am_long": 3282567,
+     "am_short": -690495,
+     "am_net": 2592072,
+     "lev_long": 316808,
+     "lev_short": -2451147,
+     "lev_net": -2134339
+    },
+    "prev": {
      "date": "2026-08-18",
      "all": 5596739,
      "am_long": 3353552,
@@ -7358,26 +7368,11 @@
      "lev_short": -2581332,
      "lev_net": -2229013
     },
-    "prev": {
-     "date": "2026-08-11",
-     "all": 5458890,
-     "am_long": 3290600,
-     "am_short": -736189,
-     "am_net": 2554411,
-     "lev_long": 341893,
-     "lev_short": -2505607,
-     "lev_net": -2163714
-    },
     "change_1w": {
-     "am_net": 31084,
-     "lev_net": -65299
+     "am_net": 6577,
+     "lev_net": 94674
     },
     "weeks_52": [
-     {
-      "date": "2025-08-26",
-      "am_net": 2468376,
-      "lev_net": -2534616
-     },
      {
       "date": "2025-09-02",
       "am_net": 2462553,
@@ -7632,12 +7627,17 @@
       "date": "2026-08-18",
       "am_net": 2585495,
       "lev_net": -2229013
+     },
+     {
+      "date": "2026-08-25",
+      "am_net": 2592072,
+      "lev_net": -2134339
      }
     ],
     "state": {
      "alignment": "mixed",
      "levf_zerocross_weeks_ago": null,
-     "lev_percentile_all": 2.5,
+     "lev_percentile_all": 3.1,
      "lev_bias": "extreme"
     }
    }
