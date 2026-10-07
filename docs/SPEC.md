@@ -1,4 +1,4 @@
-# CFTC-COT フィード データ仕様書（v1.2 / 2026-07-27・2026-08-09追記）
+# CFTC-COT フィード データ仕様書（v1.3 / 2026-07-27・2026-08-09・2026-10-07追記）
 
 ## 1. ソース
 
@@ -50,7 +50,8 @@ date,all,long,short,net
 
 - `meta`: schema_version / generated_at（JST）/ source / report_date_latest
 - `symbols.{slug}`: label / cftc_code / sign_convention / coverage /
-  latest / prev / change_1w / weeks_52（直近52週の行配列）
+  latest / prev / change_1w / weeks_52（直近52週の行配列）/ state / tff /
+  **weekly_move（v1.3。usdjpy・eurusd・gbpusd・audusd のみ。他は null。§14）**
 
 `coverage` の各キー（2026-08-09にフィールド追加）:
 
@@ -546,3 +547,74 @@ WARN を出す（表記ゆれで誤検知し得るため run は落とさない�
 ※ 旧称 "CRUDE OIL, LIGHT SWEET" から現行表記への変更時期は未調査（未確認）。
 レポートで銘柄名を書く際は「WTI原油」表記のままで問題ないが、公式ファイルを
 直接参照する場合は現行名が `WTI-PHYSICAL` である点に注意。
+
+
+---
+
+## 14. 週次の動きの判定（v1.3 / 2026-10-07追加）
+
+**位置付け**: 最新週のネットの前週比が、総建玉に対してどれだけ大きいかを機械的に分類した参考情報であり、
+**売買助言ではない**。対象は usdjpy・eurusd・gbpusd・audusd の4銘柄（`symbols.py` の `weekly_move_currency`）。
+他の銘柄は `weekly_move: null`。
+
+### 14-1. 計算
+
+```
+net_change_pct_of_oi (%) = change_1w.net ÷ latest.all × 100        （小数第2位に四捨五入して表示）
+```
+
+- 分母は**最新週の総建玉**（`latest.all`）。前週の総建玉ではない。
+- `change_1w` は暦で1週相当（隣接2週の間隔が10日以下）のときだけ出る既存の項目（§3-2）。無ければ判定できません。
+- **判定は、丸め前の厳密な比（整数どうしの比較 `|net_change| × 100 ≥ 2 × latest.all`）で行う。**
+  表示用の割合は小数第2位に丸めるため、例えば 1.996% は「2.00」と表示されても「目立った動きなし」になる。
+
+### 14-2. 判定
+
+| 条件（net_change_pct_of_oi） | 判定 |
+|---|---|
+| +2% 以上（境界を含む）で、その通貨の**買い**方向 | 「（通貨名）買い方向」 |
+| −2% 以下（境界を含む）で、その通貨の**売り**方向 | 「（通貨名）売り方向」 |
+| その間 | 「目立った動きなし」 |
+| 前週比を出せない（暦で1週相当の前週の行が無い）／総建玉が0以下 | 「判定できません」（`reason` に理由） |
+
+しきい値は `cot_common.py` の `WEEKLY_MOVE_THRESHOLD_PCT`（2）。`meta.weekly_move_thresholds` に転記する。
+
+### 14-3. 向き（買い／売り）と通貨名
+
+| slug | 通貨名 | net の増加 | net の減少 |
+|---|---|---|---|
+| usdjpy | 円 | **円売り方向** | **円買い方向** |
+| eurusd | ユーロ | ユーロ買い方向 | ユーロ売り方向 |
+| gbpusd | ポンド | ポンド買い方向 | ポンド売り方向 |
+| audusd | 豪ドル | 豪ドル買い方向 | 豪ドル売り方向 |
+
+- **usdjpy は逆向きに注意**：ネットは円先物を USD/JPY 方向に符号変換してある（§4。net プラス＝投機筋の円ショート優勢）。
+  よって**ネットの増加＝USD/JPY買い方向＝円売り方向**、**ネットの減少＝円買い方向**。向きは `sign_invert` から決める
+  （`sign_invert=True` なら増加＝売り、`False` なら増加＝買い）。
+- 通貨名は表示用の呼称（`symbols.py` の `weekly_move_currency`）。
+
+### 14-4. 出力（`symbols.{slug}.weekly_move`）
+
+| キー | 内容 |
+|---|---|
+| date / prev_date | 最新週・前週の締め日 |
+| net_change | ネットの前週比（`change_1w.net`） |
+| oi | 最新週の総建玉 |
+| net_change_pct_of_oi | `net_change ÷ oi × 100`（小数第2位。判定には使わない） |
+| threshold_pct | しきい値（2） |
+| currency | 通貨名 |
+| judgment | 判定（14-2） |
+| direction | `buy` / `sell` / `none` / null（判定できません） |
+| reason | 判定できないときの理由（それ以外は null） |
+| rule | 判定の規則の文（向きの注意を含む） |
+
+### 14-5. 検証（`tests/test_parse.py` の `test_weekly_move`）
+
+- **2026-09-29 の usdjpy**（前週比 +16,542、総建玉 360,720 → **4.59%**）が「**円売り方向**」になる。
+- 同じ週の eurusd（−10,922 ÷ 853,959 ＝ −1.28% → 目立った動きなし）・gbpusd（−8,507 ÷ 251,740 ＝ −3.38% → ポンド売り方向）・
+  audusd（−16,425 ÷ 309,800 ＝ −5.30% → 豪ドル売り方向）。
+- 境界：4銘柄とも ±2.000%（総建玉100,000・前週比±2,000）は動きあり、±1.999% は「目立った動きなし」。
+  総建玉853,959で 17,079 → 1.99997…%（動きなし）、17,080 → 2.00008…%（買い方向）。
+- 向き：usdjpy の増加＝円売り・減少＝円買い、他3銘柄の増加＝買い・減少＝売り。
+- 暦で1週相当でない前週（434日前など）・前週なし・総建玉0は「判定できません」。対象外の銘柄は `weekly_move` が None。
+- CSV から `build_feed_json()` で作り直した `cot-feed.json` に入ること（既存の `change_1w` は変わらない）。

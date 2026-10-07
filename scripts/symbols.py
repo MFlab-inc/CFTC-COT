@@ -34,6 +34,8 @@ SYMBOLS = [
         "market_hint": "JAPANESE YEN",
         "sign_invert": True,
         "fallback_codes": [],
+        # 週次の動きの判定（v1.3）の表示に使う通貨名。net の増減と買い/売りの対応は sign_invert で決まる
+        "weekly_move_currency": "円",
         "note": "円先物を USD/JPY 方向に符号変換。net プラス = 投機筋の円ショート優勢",
     },
     {
@@ -62,6 +64,8 @@ SYMBOLS = [
         "market_hint": "BRITISH POUND",
         "sign_invert": False,
         "fallback_codes": [],
+        # 週次の動きの判定（v1.3）の表示に使う通貨名。net の増減と買い/売りの対応は sign_invert で決まる
+        "weekly_move_currency": "ポンド",
         "note": "",
     },
     {
@@ -72,6 +76,8 @@ SYMBOLS = [
         "market_hint": "EURO FX",
         "sign_invert": False,
         "fallback_codes": [],
+        # 週次の動きの判定（v1.3）の表示に使う通貨名。net の増減と買い/売りの対応は sign_invert で決まる
+        "weekly_move_currency": "ユーロ",
         "note": "",
     },
     {
@@ -82,6 +88,8 @@ SYMBOLS = [
         "market_hint": "AUSTRALIAN DOLLAR",
         "sign_invert": False,
         "fallback_codes": [],
+        # 週次の動きの判定（v1.3）の表示に使う通貨名。net の増減と買い/売りの対応は sign_invert で決まる
+        "weekly_move_currency": "豪ドル",
         "note": "",
     },
     {

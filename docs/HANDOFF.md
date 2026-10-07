@@ -21,7 +21,7 @@ CFTC公式のCOT（Commitments of Traders）レポートから対象12銘柄の�
 | ダッシュボード | https://mflab-inc.github.io/CFTC-COT/ |
 | 統合フィード | https://mflab-inc.github.io/CFTC-COT/data/cot-feed.json |
 | 銘柄別CSV | `/data/csv/{slug}.csv`（Legacy）、`/data/csv/{slug}_tff.csv`（TFF） |
-| 現行スキーマ | `schema_version: "1.2"` |
+| 現行スキーマ | `schema_version: "1.3"` |
 | 依存ライブラリ | **なし**（Python 3.10+ 標準ライブラリのみ） |
 | ホスティング | GitHub Pages（Branch: `main` / フォルダ: `/(root)`） |
 
@@ -197,8 +197,8 @@ TFF側（`am_*` / `lev_*`）も**同一の符号規則**を適用する（`to_tf
 ### 5-2. cot-feed.json（`build_feed_json()`）
 ```
 meta:
-  schema_version "1.2" / name / generated_at (JST文字列) / report_date_latest
-  source{weekly, historical, note} / schema{各列の説明} / state_thresholds / notes
+  schema_version "1.3" / name / generated_at (JST文字列) / report_date_latest
+  source{weekly, historical, note} / schema{各列の説明} / state_thresholds / weekly_move_thresholds / notes
 symbols.{slug}:
   label / cftc_code / sign_convention / note
   coverage{first_date, last_date, weeks, span_weeks, present_ratio, max_gap_days, contiguous}
@@ -211,6 +211,9 @@ symbols.{slug}:
   latest / prev / change_1w{all,long,short,net}
   weeks_52[]                      # 直近52週の行
   state{...}                      # §5-3
+  weekly_move: null（対象外） | {date, prev_date, net_change, oi, net_change_pct_of_oi, threshold_pct,
+                                currency, judgment, direction, reason, rule}   # v1.3。SPEC §14
+                                # usdjpy・eurusd・gbpusd・audusd のみ。usdjpy は net の増加＝円売り方向
   tff: null（対象外） | {available, source_report, coverage, latest, prev,
                         change_1w{am_net,lev_net}, weeks_52[{date,am_net,lev_net}], state{...}}
 ```

@@ -8,6 +8,7 @@
   - 期待値: 既存スプレッドシート USD/JPY-data の 2026/07/21 行
     all=423796, long=259715, short=-107590, net=152125（照合一致済み）
 """
+import json
 import os
 import sys
 
@@ -55,6 +56,7 @@ def main():
     test_gappy_series_state()
     test_weeks_52_and_change_1w_are_calendar_based()
     test_min_samples_for_bias()
+    test_weekly_move()
     print("ALL TESTS PASSED")
     print("  usdjpy 2026-07-21:", row)
     print("  audusd 2026-07-21:", row2)
@@ -455,6 +457,125 @@ def test_min_samples_for_bias():
     assert classify_bias(percentile_of_last(list(range(1, 101)))) == "extreme"
 
     print("MIN-SAMPLE BIAS TESTS PASSED")
+
+
+def test_weekly_move():
+    """v1.3 週次の動きの判定（ネットの前週比 ÷ 総建玉。±2%以上＝動きあり、境界を含む）。
+
+    確かめること:
+      - 2026-09-29 の usdjpy（前週比 +16,542・総建玉 360,720 → 4.59%）が「円売り方向」になる
+        （usdjpy のネットは USD/JPY 方向に符号変換済み。増加＝円売り、減少＝円買い）
+      - 境界ちょうど（±2.00%）は動きあり、ぎりぎり手前（±1.999%）は「目立った動きなし」
+      - eurusd・gbpusd・audusd は net の増加＝買い方向、減少＝売り方向（通貨名つき）
+      - 暦で1週相当の前週が無いときは判定できません。対象外の銘柄は None
+    """
+    import shutil
+    import tempfile
+    import cot_common as cc
+    from cot_common import change_vs_prev, weekly_move_entry
+    from symbols import SYMBOLS
+
+    S = {s["slug"]: s for s in SYMBOLS}
+    keys = ("all", "long", "short", "net")
+
+    def rows(latest_all, latest_net, prev_net, prev_date="2026-09-22"):
+        latest = {"date": "2026-09-29", "all": latest_all, "long": 0, "short": 0, "net": latest_net}
+        prev = {"date": prev_date, "all": latest_all, "long": 0, "short": 0, "net": prev_net}
+        return latest, prev
+
+    def move(slug, latest_all, net_change, prev_net=0):
+        latest, prev = rows(latest_all, prev_net + net_change, prev_net)
+        return weekly_move_entry(S[slug], latest, prev, change_vs_prev(latest, prev, keys))
+
+    # --- 2026-09-29 の実データ（cot-feed.json の値）---
+    latest = {"date": "2026-09-29", "all": 360720, "long": 120826, "short": -176266, "net": -55440}
+    prev = {"date": "2026-09-22", "all": 378701, "long": 120292, "short": -192274, "net": -71982}
+    m = weekly_move_entry(S["usdjpy"], latest, prev, change_vs_prev(latest, prev, keys))
+    assert m["net_change"] == 16542 and m["oi"] == 360720, m
+    assert m["net_change_pct_of_oi"] == 4.59, m
+    assert m["judgment"] == "円売り方向" and m["direction"] == "sell", m
+    assert m["threshold_pct"] == 2 and m["date"] == "2026-09-29" and m["prev_date"] == "2026-09-22", m
+
+    # 同じ週の他の3銘柄（実データ）
+    real = {
+        "eurusd": (853959, -10922, -1.28, "目立った動きなし"),
+        "gbpusd": (251740, -8507, -3.38, "ポンド売り方向"),
+        "audusd": (309800, -16425, -5.30, "豪ドル売り方向"),
+    }
+    for slug, (oi, ch, pct, label) in real.items():
+        m = move(slug, oi, ch, prev_net=-50000)
+        assert (m["net_change"], m["net_change_pct_of_oi"], m["judgment"]) == (ch, pct, label), (slug, m)
+
+    # --- 符号：usdjpy は増加＝円売り・減少＝円買い。他は増加＝買い・減少＝売り ---
+    expect = {
+        "usdjpy": ("円売り方向", "円買い方向"),
+        "eurusd": ("ユーロ買い方向", "ユーロ売り方向"),
+        "gbpusd": ("ポンド買い方向", "ポンド売り方向"),
+        "audusd": ("豪ドル買い方向", "豪ドル売り方向"),
+    }
+    for slug, (up, down) in expect.items():
+        assert move(slug, 100000, +2000)["judgment"] == up, slug      # ちょうど +2.00% ＝境界を含む
+        assert move(slug, 100000, -2000)["judgment"] == down, slug    # ちょうど −2.00%
+        assert move(slug, 100000, +1999)["judgment"] == "目立った動きなし", slug
+        assert move(slug, 100000, -1999)["judgment"] == "目立った動きなし", slug
+        assert move(slug, 100000, +2001)["judgment"] == up, slug
+        assert move(slug, 100000, 0)["judgment"] == "目立った動きなし", slug
+        assert move(slug, 100000, +2000)["direction"] in ("buy", "sell")
+    assert move("usdjpy", 100000, +2000)["direction"] == "sell"
+    assert move("usdjpy", 100000, -2000)["direction"] == "buy"
+    assert move("eurusd", 100000, +2000)["direction"] == "buy"
+    assert move("usdjpy", 100000, 0)["direction"] == "none"
+
+    # 割合は小数第2位に丸めて表示するが、判定は丸め前の厳密な比で行う（1.996% は 2.00 と表示されても動きなし）
+    m = move("eurusd", 100000, +1996)
+    assert m["net_change_pct_of_oi"] == 2.0 and m["judgment"] == "目立った動きなし", m
+    m = move("eurusd", 100000, +2004)
+    assert m["net_change_pct_of_oi"] == 2.0 and m["judgment"] == "ユーロ買い方向", m
+    # 総建玉が大きくても整数で比べる（浮動小数の誤差を持ち込まない）
+    assert move("eurusd", 853959, +17079)["judgment"] == "目立った動きなし"     # 17079/853959 = 1.99997...%
+    assert move("eurusd", 853959, +17080)["judgment"] == "ユーロ買い方向"       # 17080/853959 = 2.00008...%
+
+    # --- 前週が暦で1週相当でない／無い／総建玉0 → 判定できません ---
+    latest, prev = rows(100000, 5000, 0, prev_date="2025-08-26")
+    m = weekly_move_entry(S["usdjpy"], latest, prev, change_vs_prev(latest, prev, keys))
+    assert m["judgment"] == "判定できません" and m["net_change_pct_of_oi"] is None and m["reason"], m
+    assert weekly_move_entry(S["usdjpy"], latest, None, None)["judgment"] == "判定できません"
+    assert weekly_move_entry(S["usdjpy"], None, None, None)["judgment"] == "判定できません"
+    latest0, prev0 = rows(0, 5, 0)
+    m = weekly_move_entry(S["usdjpy"], latest0, prev0, change_vs_prev(latest0, prev0, keys))
+    assert m["judgment"] == "判定できません", m
+
+    # --- 対象外の銘柄は None ---
+    for slug in ("eurjpy", "sp500", "nikkei225", "nydow", "wti", "gold", "copper", "us10y"):
+        assert weekly_move_entry(S[slug], latest, prev, None) is None, slug
+    assert sorted(s["slug"] for s in SYMBOLS if s.get("weekly_move_currency")) == ["audusd", "eurusd", "gbpusd", "usdjpy"]
+
+    # --- cot-feed.json に入る（CSVから作り直す通しの確認。実データの2週ぶん）---
+    tmp = tempfile.mkdtemp(prefix="cot-weekly-move-")
+    saved = (cc.CSV_DIR, cc.DATA_DIR, cc.FEED_JSON)
+    cc.CSV_DIR, cc.DATA_DIR, cc.FEED_JSON = tmp, tmp, os.path.join(tmp, "cot-feed.json")
+    try:
+        cc.write_symbol_csv("usdjpy", {
+            "2026-09-22": {"date": "2026-09-22", "all": 378701, "long": 120292, "short": -192274, "net": -71982},
+            "2026-09-29": {"date": "2026-09-29", "all": 360720, "long": 120826, "short": -176266, "net": -55440},
+        })
+        cc.write_symbol_csv("eurjpy", {
+            "2026-09-29": {"date": "2026-09-29", "all": 1000, "long": 1, "short": -1, "net": 0},
+        })
+        cc.build_feed_json([S["usdjpy"], S["eurjpy"]])
+        with open(cc.FEED_JSON, encoding="utf-8") as f:
+            feed = json.load(f)
+        assert feed["meta"]["schema_version"] == "1.3"
+        assert feed["meta"]["weekly_move_thresholds"]["net_change_pct_of_oi"] == 2
+        wm = feed["symbols"]["usdjpy"]["weekly_move"]
+        assert wm["judgment"] == "円売り方向" and wm["net_change_pct_of_oi"] == 4.59, wm
+        assert feed["symbols"]["usdjpy"]["change_1w"]["net"] == 16542       # 既存の項目は変わらない
+        assert feed["symbols"]["eurjpy"]["weekly_move"] is None
+    finally:
+        cc.CSV_DIR, cc.DATA_DIR, cc.FEED_JSON = saved
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    print("WEEKLY MOVE TESTS PASSED")
 
 
 if __name__ == "__main__":
