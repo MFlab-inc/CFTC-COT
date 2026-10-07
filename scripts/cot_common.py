@@ -29,6 +29,7 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 CSV_DIR = os.path.join(DATA_DIR, "csv")
@@ -231,6 +232,71 @@ def change_vs_prev(latest, prev, keys):
     return {k: latest[k] - prev[k] for k in keys}
 
 
+# ============================================================
+# 週次の動きの判定（v1.3 / 2026-10-07）— 機械的な基準による参考情報。売買助言ではない。
+#   最新週のネットの前週比 ÷ 最新週の総建玉（all）。その大きさが WEEKLY_MOVE_THRESHOLD_PCT（%）以上
+#   （境界を含む）なら、ネットの増減の向きで「（通貨名）買い方向／売り方向」、未満なら「目立った動きなし」。
+#   向き：net は sign_invert=False（EUR/USD・GBP/USD・AUD/USD）では「非商業ロング−ショート」で、増加＝その通貨の
+#   買い方向。sign_invert=True（USD/JPY）では円先物をUSD/JPY方向に符号変換してあるため、増加＝USD/JPY買い＝
+#   円売り方向、減少＝円買い方向（注意：円は逆向き）。
+#   判定は丸め前の厳密な比（整数どうしの比較）で行う。表示用の割合は小数第2位に丸めるため、例えば 1.996% は
+#   2.00 と表示されても「目立った動きなし」になる。
+# ============================================================
+
+WEEKLY_MOVE_THRESHOLD_PCT = 2
+WEEKLY_MOVE_NONE = "目立った動きなし"
+WEEKLY_MOVE_UNAVAILABLE = "判定できません"
+
+
+def weekly_move_entry(sym, latest, prev, change):
+    """週次の動きの判定ブロック（対象外の銘柄は None）。
+
+    sym: symbols.py の銘柄定義（weekly_move_currency があるものだけ対象）
+    latest / prev: 最新週・前週の行、change: change_vs_prev() の結果（暦で1週相当でなければ None）
+    """
+    currency = sym.get("weekly_move_currency")
+    if not currency:
+        return None
+    net_up_is_buy = not sym["sign_invert"]
+    out = {
+        "date": latest["date"] if latest else None,
+        "prev_date": prev["date"] if prev else None,
+        "net_change": None,
+        "oi": latest["all"] if latest else None,
+        "net_change_pct_of_oi": None,
+        "threshold_pct": WEEKLY_MOVE_THRESHOLD_PCT,
+        "currency": currency,
+        "judgment": WEEKLY_MOVE_UNAVAILABLE,
+        "direction": None,
+        "reason": None,
+        "rule": ("最新週のネットの前週比 ÷ 最新週の総建玉 が +%d%% 以上なら「%s%s方向」、-%d%% 以下なら「%s%s方向」、"
+                 "その間は「%s」（境界を含む）。%s"
+                 % (WEEKLY_MOVE_THRESHOLD_PCT, currency, "買い" if net_up_is_buy else "売り",
+                    WEEKLY_MOVE_THRESHOLD_PCT, currency, "売り" if net_up_is_buy else "買い",
+                    WEEKLY_MOVE_NONE,
+                    "ネットはUSD/JPY方向に符号変換済みのため、増加＝円売り方向、減少＝円買い方向"
+                    if sym["sign_invert"] else "ネットの増加＝買い方向、減少＝売り方向")),
+    }
+    if not latest or not prev or not change:
+        out["reason"] = "暦で1週相当の前週の行が無いため、前週比を出せません"
+        return out
+    oi = latest["all"]
+    if not oi or oi <= 0:
+        out["reason"] = "最新週の総建玉が0以下のため、割合を出せません"
+        return out
+    net_change = change["net"]
+    out["net_change"] = net_change
+    out["net_change_pct_of_oi"] = float(
+        (Decimal(net_change) * 100 / Decimal(oi)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    if abs(net_change) * 100 < WEEKLY_MOVE_THRESHOLD_PCT * oi:
+        out["judgment"], out["direction"] = WEEKLY_MOVE_NONE, "none"
+        return out
+    buy = (net_change > 0) == net_up_is_buy
+    out["judgment"] = "%s%s方向" % (currency, "買い" if buy else "売り")
+    out["direction"] = "buy" if buy else "sell"
+    return out
+
+
 def coverage_block(dates):
     """coverage ブロックを作る。
 
@@ -266,7 +332,7 @@ def build_feed_json(symbols, generated_note=""):
     now_jst = datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S JST")
     feed = {
         "meta": {
-            "schema_version": "1.2",
+            "schema_version": "1.3",
             "name": "MFLab CFTC COT Feed",
             "generated_at": now_jst,
             "source": {
@@ -282,8 +348,15 @@ def build_feed_json(symbols, generated_note=""):
                 "short": "非商業ポジション（負値）",
                 "net": "long + short",
                 "tff": "TFF(金融先物のみ): am_*=アセットマネジャー(機関投資家等), lev_*=レバレッジド・ファンド(ヘッジファンド等)。符号規則はlong/shortと同一",
+                "weekly_move": "週次の動き（usdjpy・eurusd・gbpusd・audusd のみ）: net_change=ネットの前週比, oi=最新週の総建玉, net_change_pct_of_oi=net_change÷oi(%, 小数第2位), judgment=判定",
             },
             "state_thresholds": STATE_THRESHOLDS,
+            "weekly_move_thresholds": {
+                "net_change_pct_of_oi": WEEKLY_MOVE_THRESHOLD_PCT,
+                "note": "最新週のネットの前週比 ÷ 最新週の総建玉。この%以上（境界を含む）で動きありと判定。"
+                        "対象は usdjpy・eurusd・gbpusd・audusd。usdjpy はネットがUSD/JPY方向に符号変換済みのため、"
+                        "増加＝円売り方向。機械的な参考情報で売買助言ではない",
+            },
             "notes": generated_note,
         },
         "symbols": {},
@@ -306,6 +379,7 @@ def build_feed_json(symbols, generated_note=""):
         }
         entry["change_1w"] = change_vs_prev(entry["latest"], entry["prev"],
                                             ("all", "long", "short", "net"))
+        entry["weekly_move"] = weekly_move_entry(s, entry["latest"], entry["prev"], entry["change_1w"])
         entry["tff"] = tff_feed_entry(s)
         if dates:
             latest_dates.append(dates[-1])

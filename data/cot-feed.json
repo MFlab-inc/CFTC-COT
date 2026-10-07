@@ -1,8 +1,8 @@
 {
  "meta": {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "name": "MFLab CFTC COT Feed",
-  "generated_at": "2026-10-03 14:32:09 JST",
+  "generated_at": "2026-10-07 14:55:41 JST",
   "source": {
    "weekly": "https://www.cftc.gov/dea/newcot/deafut.txt",
    "historical": "https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm",
@@ -14,7 +14,8 @@
    "long": "非商業ポジション（usdjpy は円先物ショートを USD/JPY 買い方向として記録）",
    "short": "非商業ポジション（負値）",
    "net": "long + short",
-   "tff": "TFF(金融先物のみ): am_*=アセットマネジャー(機関投資家等), lev_*=レバレッジド・ファンド(ヘッジファンド等)。符号規則はlong/shortと同一"
+   "tff": "TFF(金融先物のみ): am_*=アセットマネジャー(機関投資家等), lev_*=レバレッジド・ファンド(ヘッジファンド等)。符号規則はlong/shortと同一",
+   "weekly_move": "週次の動き（usdjpy・eurusd・gbpusd・audusd のみ）: net_change=ネットの前週比, oi=最新週の総建玉, net_change_pct_of_oi=net_change÷oi(%, 小数第2位), judgment=判定"
   },
   "state_thresholds": {
    "percentile_extreme": [
@@ -29,6 +30,10 @@
    "levf_zerocross_weeks": 8,
    "min_samples_for_bias": 26,
    "note": "仮置き閾値による機械的な状態表示。売買助言ではない。実測に基づき調整可"
+  },
+  "weekly_move_thresholds": {
+   "net_change_pct_of_oi": 2,
+   "note": "最新週のネットの前週比 ÷ 最新週の総建玉。この%以上（境界を含む）で動きありと判定。対象は usdjpy・eurusd・gbpusd・audusd。usdjpy はネットがUSD/JPY方向に符号変換済みのため、増加＝円売り方向。機械的な参考情報で売買助言ではない"
   },
   "notes": "weekly update from https://www.cftc.gov/dea/newcot/deafut.txt",
   "report_date_latest": "2026-09-29"
@@ -440,6 +445,19 @@
     "side": "short",
     "momentum_4w": -147667,
     "momentum_label": "ショート積み増し"
+   },
+   "weekly_move": {
+    "date": "2026-09-29",
+    "prev_date": "2026-09-22",
+    "net_change": 16542,
+    "oi": 360720,
+    "net_change_pct_of_oi": 4.59,
+    "threshold_pct": 2,
+    "currency": "円",
+    "judgment": "円売り方向",
+    "direction": "sell",
+    "reason": null,
+    "rule": "最新週のネットの前週比 ÷ 最新週の総建玉 が +2% 以上なら「円売り方向」、-2% 以下なら「円買い方向」、その間は「目立った動きなし」（境界を含む）。ネットはUSD/JPY方向に符号変換済みのため、増加＝円売り方向、減少＝円買い方向"
    },
    "tff": {
     "available": true,
@@ -1147,6 +1165,7 @@
     "momentum_4w": 67,
     "momentum_label": "ロング積み増し"
    },
+   "weekly_move": null,
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
@@ -1854,6 +1873,19 @@
     "side": "short",
     "momentum_4w": -41500,
     "momentum_label": "ショート積み増し"
+   },
+   "weekly_move": {
+    "date": "2026-09-29",
+    "prev_date": "2026-09-22",
+    "net_change": -8507,
+    "oi": 251740,
+    "net_change_pct_of_oi": -3.38,
+    "threshold_pct": 2,
+    "currency": "ポンド",
+    "judgment": "ポンド売り方向",
+    "direction": "sell",
+    "reason": null,
+    "rule": "最新週のネットの前週比 ÷ 最新週の総建玉 が +2% 以上なら「ポンド買い方向」、-2% 以下なら「ポンド売り方向」、その間は「目立った動きなし」（境界を含む）。ネットの増加＝買い方向、減少＝売り方向"
    },
    "tff": {
     "available": true,
@@ -2568,6 +2600,19 @@
     "momentum_4w": -38331,
     "momentum_label": "ショート積み増し"
    },
+   "weekly_move": {
+    "date": "2026-09-29",
+    "prev_date": "2026-09-22",
+    "net_change": -10922,
+    "oi": 853959,
+    "net_change_pct_of_oi": -1.28,
+    "threshold_pct": 2,
+    "currency": "ユーロ",
+    "judgment": "目立った動きなし",
+    "direction": "none",
+    "reason": null,
+    "rule": "最新週のネットの前週比 ÷ 最新週の総建玉 が +2% 以上なら「ユーロ買い方向」、-2% 以下なら「ユーロ売り方向」、その間は「目立った動きなし」（境界を含む）。ネットの増加＝買い方向、減少＝売り方向"
+   },
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
@@ -3280,6 +3325,19 @@
     "side": "short",
     "momentum_4w": -23833,
     "momentum_label": "ショート積み増し"
+   },
+   "weekly_move": {
+    "date": "2026-09-29",
+    "prev_date": "2026-09-22",
+    "net_change": -16425,
+    "oi": 309800,
+    "net_change_pct_of_oi": -5.3,
+    "threshold_pct": 2,
+    "currency": "豪ドル",
+    "judgment": "豪ドル売り方向",
+    "direction": "sell",
+    "reason": null,
+    "rule": "最新週のネットの前週比 ÷ 最新週の総建玉 が +2% 以上なら「豪ドル買い方向」、-2% 以下なら「豪ドル売り方向」、その間は「目立った動きなし」（境界を含む）。ネットの増加＝買い方向、減少＝売り方向"
    },
    "tff": {
     "available": true,
@@ -3994,6 +4052,7 @@
     "momentum_4w": -55585,
     "momentum_label": "ショート積み増し"
    },
+   "weekly_move": null,
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
@@ -4707,6 +4766,7 @@
     "momentum_4w": -1359,
     "momentum_label": "ロング縮小"
    },
+   "weekly_move": null,
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
@@ -5420,6 +5480,7 @@
     "momentum_4w": -7599,
     "momentum_label": "ロング縮小"
    },
+   "weekly_move": null,
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
@@ -6133,6 +6194,7 @@
     "momentum_4w": -20448,
     "momentum_label": "ロング縮小"
    },
+   "weekly_move": null,
    "tff": null
   },
   "gold": {
@@ -6542,6 +6604,7 @@
     "momentum_4w": -9492,
     "momentum_label": "ロング縮小"
    },
+   "weekly_move": null,
    "tff": null
   },
   "copper": {
@@ -6951,6 +7014,7 @@
     "momentum_4w": 4542,
     "momentum_label": "ロング積み増し"
    },
+   "weekly_move": null,
    "tff": null
   },
   "us10y": {
@@ -7360,6 +7424,7 @@
     "momentum_4w": 8660,
     "momentum_label": "ショート縮小"
    },
+   "weekly_move": null,
    "tff": {
     "available": true,
     "source_report": "Traders in Financial Futures (Futures Only)",
